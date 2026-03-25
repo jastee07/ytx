@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -11,10 +9,10 @@ class VideoSummary(BaseModel):
     video_id: str
     title: str
     published_at: str
-    description: Optional[str] = None
+    description: str | None = None
     channel_id: str
-    privacy_status: Optional[str] = None
-    duration: Optional[str] = None
-    view_count: Optional[int] = None
-    like_count: Optional[int] = None
-    comment_count: Optional[int] = None
+    privacy_status: str | None = None
+    duration: str | None = None
+    view_count: int | None = None
+    like_count: int | None = None
+    comment_count: int | None = None

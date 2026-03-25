@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Dict, Literal
+from datetime import UTC, datetime
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,8 +12,8 @@ class Envelope(BaseModel):
     ok: bool = True
     api: str
     profile: str
-    generated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
-    data: Dict[str, Any]
+    generated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z"))
+    data: dict[str, Any]
 
 
 class ErrorDetail(BaseModel):
@@ -21,7 +21,7 @@ class ErrorDetail(BaseModel):
 
     code: str
     message: str
-    details: Dict[str, Any] = Field(default_factory=dict)
+    details: dict[str, Any] = Field(default_factory=dict)
 
 
 class ErrorEnvelope(BaseModel):

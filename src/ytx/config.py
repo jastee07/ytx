@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import tomllib
 
 from ytx.auth.profiles import ProfileStore
 from ytx.auth.store import KeyringBackedStore, LocalSecretStore
@@ -63,7 +64,7 @@ def build_paths() -> AppPaths:
 def load_settings(paths: AppPaths) -> Settings:
     if not paths.config_toml.exists():
         return Settings()
-    app = _parse_simple_toml(paths.config_toml.read_text(encoding="utf-8")).get("app", {})
+    app = tomllib.loads(paths.config_toml.read_text(encoding="utf-8")).get("app", {})
     return Settings(
         default_profile=app.get("default_profile", "default"),
         client_secret_path=app.get("client_secret_path"),
@@ -87,27 +88,3 @@ def write_settings(paths: AppPaths, settings: Settings) -> None:
         ]
     )
     paths.config_toml.write_text(contents, encoding="utf-8")
-
-
-def _parse_simple_toml(contents: str) -> dict[str, dict[str, str | bool | int]]:
-    section = None
-    data: dict[str, dict[str, str | bool | int]] = {}
-    for raw_line in contents.splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("[") and line.endswith("]"):
-            section = line[1:-1].strip()
-            data.setdefault(section, {})
-            continue
-        if "=" not in line or section is None:
-            continue
-        key, value = [part.strip() for part in line.split("=", 1)]
-        if value.startswith('"') and value.endswith('"'):
-            parsed: str | bool | int = value[1:-1]
-        elif value.lower() in {"true", "false"}:
-            parsed = value.lower() == "true"
-        else:
-            parsed = int(value)
-        data[section][key] = parsed
-    return data

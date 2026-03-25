@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 import json
 import sqlite3
 from pathlib import Path
@@ -42,7 +42,7 @@ class SQLiteCache:
             )
 
     def set(self, namespace: str, key: str, payload: Any, ttl_seconds: int) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expires_at = now + timedelta(seconds=ttl_seconds)
         cache_key = f"{namespace}:{key}"
         with self._connect() as conn:
@@ -68,7 +68,7 @@ class SQLiteCache:
         if not row:
             return None
         payload_json, expires_at = row
-        if datetime.fromisoformat(expires_at) < datetime.now(timezone.utc):
+        if datetime.fromisoformat(expires_at) < datetime.now(UTC):
             self.delete(namespace, key)
             return None
         return json.loads(payload_json)

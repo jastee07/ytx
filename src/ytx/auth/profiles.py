@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import json
 from pathlib import Path
 from typing import Any
@@ -42,7 +42,7 @@ class ProfileStore:
     ) -> dict[str, Any]:
         payload = self._load()
         profiles = payload.setdefault("profiles", {})
-        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         current = profiles.get(name, {})
         current.update(
             {

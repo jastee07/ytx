@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 import re
 
 from ytx.errors import ValidationError
@@ -9,7 +9,7 @@ _RANGE_RE = re.compile(r"^(?P<days>\d+)d$")
 
 
 def today_utc() -> date:
-    return datetime.now(timezone.utc).date()
+    return datetime.now(UTC).date()
 
 
 def parse_date_range(range_value: str | None, start_date: str | None, end_date: str | None) -> tuple[str, str]:

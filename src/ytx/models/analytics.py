@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -11,12 +9,12 @@ class AnalyticsQuery(BaseModel):
     entity: str
     start_date: str
     end_date: str
-    metrics: List[str]
-    dimensions: List[str] = Field(default_factory=list)
-    filters: List[str] = Field(default_factory=list)
-    sort: List[str] = Field(default_factory=list)
-    max_results: Optional[int] = None
-    video_id: Optional[str] = None
+    metrics: list[str]
+    dimensions: list[str] = Field(default_factory=list)
+    filters: list[str] = Field(default_factory=list)
+    sort: list[str] = Field(default_factory=list)
+    max_results: int | None = None
+    video_id: str | None = None
 
 
 class AnalyticsReport(BaseModel):
@@ -25,8 +23,8 @@ class AnalyticsReport(BaseModel):
     entity: str
     start_date: str
     end_date: str
-    metrics: List[str]
-    dimensions: List[str]
-    filters: List[str]
+    metrics: list[str]
+    dimensions: list[str]
+    filters: list[str]
     rows: list[dict]
-    totals: Optional[Dict[str, Union[float, int]]] = None
+    totals: dict[str, float | int] | None = None

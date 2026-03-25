@@ -69,9 +69,7 @@ Expected local files under `~/.config/ytx/`:
 Use:
 
 ```powershell
-$env:PYTHONPATH='src'
-$env:PYTHONDONTWRITEBYTECODE='1'
-pytest -q -p no:cacheprovider
+py -3.13 -m pytest -q
 ```
 
 The repo currently tests deterministic local logic only. Live OAuth and Google API calls require real credentials and should not be added to automated tests.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -12,7 +12,7 @@ def test_parse_date_range_from_named_range(monkeypatch: pytest.MonkeyPatch) -> N
     class FixedDateTime(datetime):
         @classmethod
         def now(cls, tz=None):
-            return cls(2026, 3, 25, tzinfo=timezone.utc)
+            return cls(2026, 3, 25, tzinfo=UTC)
 
     monkeypatch.setattr(dates, "datetime", FixedDateTime)
     assert dates.parse_date_range("7d", None, None) == ("2026-03-19", "2026-03-25")

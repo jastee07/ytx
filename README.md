@@ -39,7 +39,7 @@ pip install -e .[dev]
 Run tests with:
 
 ```bash
-PYTHONPATH=src pytest -q
+py -3.13 -m pytest -q
 ```
-# ytx
-An agent friendly CLI tool for YouTube API's
+
+Runtime target: Python 3.13+.

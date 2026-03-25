@@ -7,7 +7,7 @@ name = "ytx"
 version = "0.1.0"
 description = "Read-only, agent-friendly YouTube CLI"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = { file = "LICENSE" }
 authors = [{ name = "OpenAI Codex" }]
 dependencies = [

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -10,9 +8,9 @@ class ChannelProfile(BaseModel):
 
     channel_id: str
     title: str
-    custom_url: Optional[str] = None
-    published_at: Optional[str] = None
-    country: Optional[str] = None
-    subscriber_count: Optional[int] = None
-    video_count: Optional[int] = None
-    view_count: Optional[int] = None
+    custom_url: str | None = None
+    published_at: str | None = None
+    country: str | None = None
+    subscriber_count: int | None = None
+    video_count: int | None = None
+    view_count: int | None = None
