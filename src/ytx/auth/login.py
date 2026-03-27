@@ -5,7 +5,7 @@ from typing import Any
 from ytx.errors import AuthError
 
 
-def run_installed_app_flow(client_secret_path: str, scopes: list[str], port: int = 0):
+def run_installed_app_flow(client_secret_path: str, scopes: list[str], port: int = 0, headless: bool = False):
     try:
         from google_auth_oauthlib.flow import InstalledAppFlow
     except ImportError as exc:
@@ -15,7 +15,10 @@ def run_installed_app_flow(client_secret_path: str, scopes: list[str], port: int
         ) from exc
 
     flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, scopes=scopes)
-    credentials = flow.run_local_server(port=port)
+    if headless:
+        credentials = flow.run_console()
+    else:
+        credentials = flow.run_local_server(port=port)
     if not credentials:
         raise AuthError(code="AUTH_REQUIRED", message="OAuth login did not return credentials.")
     return credentials
