@@ -8,6 +8,7 @@ from rich.console import Console
 from ytx.auth.session import load_credentials, persist_credentials, refresh_credentials
 from ytx.clients.youtube_analytics import YouTubeAnalyticsClient
 from ytx.clients.youtube_data import YouTubeDataClient
+from ytx.clients.youtube_reporting import YouTubeReportingClient
 from ytx.config import AppContext
 from ytx.errors import ScopeError, ValidationError, YtxError
 from ytx.formatters.csv_out import emit_csv
@@ -117,3 +118,10 @@ def load_analytics_client(ctx: AppContext, profile_name: str) -> YouTubeAnalytic
     refresh_credentials(credentials)
     persist_credentials(ctx.secret_store, profile_name, credentials)
     return YouTubeAnalyticsClient(credentials)
+
+
+def load_reporting_client(ctx: AppContext, profile_name: str) -> YouTubeReportingClient:
+    credentials = load_credentials(ctx.secret_store, profile_name)
+    refresh_credentials(credentials)
+    persist_credentials(ctx.secret_store, profile_name, credentials)
+    return YouTubeReportingClient(credentials)

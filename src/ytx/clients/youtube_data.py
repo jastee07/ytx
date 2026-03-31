@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ytx.errors import ApiError
+from ytx.errors import ApiError, map_google_http_error
 
 
 class YouTubeDataClient:
@@ -14,11 +14,14 @@ class YouTubeDataClient:
         self._service = build("youtube", "v3", credentials=credentials, cache_discovery=False)
 
     def get_mine_channel(self) -> dict[str, Any]:
-        response = (
-            self._service.channels()
-            .list(part="id,snippet,statistics,contentDetails,brandingSettings", mine=True)
-            .execute()
-        )
+        try:
+            response = (
+                self._service.channels()
+                .list(part="id,snippet,statistics,contentDetails,brandingSettings", mine=True)
+                .execute()
+            )
+        except Exception as exc:
+            raise map_google_http_error(exc) from exc
         items = response.get("items", [])
         if not items:
             raise ApiError(code="RESOURCE_NOT_FOUND", message="No channel found for the authenticated account.")
@@ -29,25 +32,31 @@ class YouTubeDataClient:
         return channel["contentDetails"]["relatedPlaylists"]["uploads"]
 
     def list_playlist_items(self, playlist_id: str, max_results: int, page_token: str | None = None) -> dict[str, Any]:
-        return (
-            self._service.playlistItems()
-            .list(
-                part="contentDetails,snippet",
-                playlistId=playlist_id,
-                maxResults=max_results,
-                pageToken=page_token,
+        try:
+            return (
+                self._service.playlistItems()
+                .list(
+                    part="contentDetails,snippet",
+                    playlistId=playlist_id,
+                    maxResults=max_results,
+                    pageToken=page_token,
+                )
+                .execute()
             )
-            .execute()
-        )
+        except Exception as exc:
+            raise map_google_http_error(exc) from exc
 
     def get_videos(self, video_ids: list[str]) -> list[dict[str, Any]]:
         if not video_ids:
             return []
-        response = (
-            self._service.videos()
-            .list(part="id,snippet,contentDetails,statistics,status", id=",".join(video_ids))
-            .execute()
-        )
+        try:
+            response = (
+                self._service.videos()
+                .list(part="id,snippet,contentDetails,statistics,status", id=",".join(video_ids))
+                .execute()
+            )
+        except Exception as exc:
+            raise map_google_http_error(exc) from exc
         return response.get("items", [])
 
     def get_video(self, video_id: str) -> dict[str, Any]:
