@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ytx.errors import ApiError
+from ytx.errors import ApiError, map_google_http_error
 
 
 class YouTubeAnalyticsClient:
@@ -42,4 +42,4 @@ class YouTubeAnalyticsClient:
         try:
             return self._service.reports().query(**params).execute()
         except Exception as exc:
-            raise ApiError(code="API_ERROR", message=str(exc)) from exc
+            raise map_google_http_error(exc) from exc

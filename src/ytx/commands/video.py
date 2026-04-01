@@ -87,12 +87,16 @@ def video_get(
         raise typer.Exit(code=1)
 
 
+DEFAULT_VIDEO_METRICS = "views,watch_time"
+
+
 @app.command("analytics")
 def video_analytics(
     video_id: str,
     range_value: str | None = typer.Option(None, "--range"),
     start_date: str | None = typer.Option(None, "--start-date"),
     end_date: str | None = typer.Option(None, "--end-date"),
+    metrics: str = typer.Option(DEFAULT_VIDEO_METRICS, "--metrics"),
     dimensions: str | None = typer.Option(None, "--dimensions"),
     profile: str | None = typer.Option(None, "--profile"),
     as_json: bool = typer.Option(False, "--json"),
@@ -106,13 +110,15 @@ def video_analytics(
         require_capability(profile_meta, READ_ANALYTICS)
         resolved_start, resolved_end = parse_date_range(range_value, start_date, end_date)
         dimension_list = [dimensions] if dimensions else []
+        from ytx.utils.metrics import split_csv
+        metric_list = split_csv(metrics)
         service = AnalyticsService(load_analytics_client(ctx, profile_name), ctx.cache)
         report = service.query(
             AnalyticsQuery(
                 entity="video",
                 start_date=resolved_start,
                 end_date=resolved_end,
-                metrics=["views", "watch_time"],
+                metrics=metric_list,
                 dimensions=dimension_list,
                 filters=[],
                 sort=[],
