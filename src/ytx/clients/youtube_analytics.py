@@ -8,10 +8,13 @@ from ytx.errors import ApiError, map_google_http_error
 class YouTubeAnalyticsClient:
     def __init__(self, credentials: Any) -> None:
         try:
+            import httplib2
+            from google_auth_httplib2 import AuthorizedHttp
             from googleapiclient.discovery import build
         except ImportError as exc:
             raise ApiError(code="API_ERROR", message="google-api-python-client is required for YouTube Analytics access.") from exc
-        self._service = build("youtubeAnalytics", "v2", credentials=credentials, cache_discovery=False)
+        http = AuthorizedHttp(credentials, http=httplib2.Http(timeout=30))
+        self._service = build("youtubeAnalytics", "v2", http=http, cache_discovery=False)
 
     def query(
         self,

@@ -21,13 +21,16 @@ class YouTubeReportingClient:
 
     def __init__(self, credentials: Any) -> None:
         try:
+            import httplib2
+            from google_auth_httplib2 import AuthorizedHttp
             from googleapiclient.discovery import build
         except ImportError as exc:
             raise ApiError(
                 code="API_ERROR",
                 message="google-api-python-client is required for YouTube Reporting access.",
             ) from exc
-        self._service = build("youtubereporting", "v1", credentials=credentials, cache_discovery=False)
+        http = AuthorizedHttp(credentials, http=httplib2.Http(timeout=30))
+        self._service = build("youtubereporting", "v1", http=http, cache_discovery=False)
 
     # ------------------------------------------------------------------
     # Report types

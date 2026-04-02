@@ -147,6 +147,21 @@ class FakeCache:
     def set(self, ns, key, payload, ttl_seconds):
         self.store[(ns, key)] = payload
 
+    def list_all(self):
+        return [
+            {"namespace": ns, "cache_key": f"{ns}:{key}", "expires_at": "2099-01-01T00:00:00+00:00", "created_at": "2026-01-01T00:00:00+00:00"}
+            for (ns, key) in self.store
+        ]
+
+    def clear(self, namespace=None):
+        if namespace:
+            keys = [(ns, k) for (ns, k) in list(self.store) if ns == namespace]
+        else:
+            keys = list(self.store)
+        for k in keys:
+            del self.store[k]
+        return len(keys)
+
 
 class FakeDataClient:
     def get_mine_channel(self):
