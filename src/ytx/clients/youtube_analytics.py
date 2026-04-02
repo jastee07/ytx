@@ -43,6 +43,6 @@ class YouTubeAnalyticsClient:
         if max_results:
             params["maxResults"] = max_results
         try:
-            return self._service.reports().query(**params).execute()
+            return self._service.reports().query(**params).execute(num_retries=3)
         except Exception as exc:
             raise map_google_http_error(exc) from exc

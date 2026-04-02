@@ -21,7 +21,7 @@ class YouTubeDataClient:
             response = (
                 self._service.channels()
                 .list(part="id,snippet,statistics,contentDetails,brandingSettings", mine=True)
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -44,7 +44,7 @@ class YouTubeDataClient:
                     maxResults=max_results,
                     pageToken=page_token,
                 )
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -56,7 +56,7 @@ class YouTubeDataClient:
             response = (
                 self._service.videos()
                 .list(part="id,snippet,contentDetails,statistics,status", id=",".join(video_ids))
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc

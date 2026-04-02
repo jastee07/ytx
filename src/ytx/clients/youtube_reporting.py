@@ -42,7 +42,7 @@ class YouTubeReportingClient:
             response = (
                 self._service.reportTypes()
                 .list(includeSystemManaged=include_system_managed)
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -58,7 +58,7 @@ class YouTubeReportingClient:
             response = (
                 self._service.jobs()
                 .list(includeSystemManaged=include_system_managed)
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -68,14 +68,14 @@ class YouTubeReportingClient:
         """Create a new reporting job for the given report type."""
         body = {"reportTypeId": report_type_id, "name": name}
         try:
-            return self._service.jobs().create(body=body).execute()
+            return self._service.jobs().create(body=body).execute(num_retries=3)
         except Exception as exc:
             raise map_google_http_error(exc) from exc
 
     def delete_job(self, job_id: str) -> None:
         """Delete a reporting job by ID."""
         try:
-            self._service.jobs().delete(jobId=job_id).execute()
+            self._service.jobs().delete(jobId=job_id).execute(num_retries=3)
         except Exception as exc:
             raise map_google_http_error(exc) from exc
 
@@ -103,7 +103,7 @@ class YouTubeReportingClient:
         if start_time_at_or_after:
             params["startTimeAtOrAfter"] = start_time_at_or_after
         try:
-            response = self._service.jobs().reports().list(**params).execute()
+            response = self._service.jobs().reports().list(**params).execute(num_retries=3)
         except Exception as exc:
             raise map_google_http_error(exc) from exc
         return response.get("reports", [])
