@@ -190,6 +190,45 @@ class FakeAnalyticsClient:
         return FAKE_ANALYTICS_RESPONSE
 
 
+FAKE_REPORT_TYPES = [
+    {"id": "rtype1", "name": "channel_basic_a2", "deprecateTime": None},
+]
+
+FAKE_JOBS = [
+    {"id": "job1", "reportTypeId": "rtype1", "name": "My daily report", "createTime": "2026-01-01T00:00:00Z"},
+]
+
+FAKE_REPORTS = [
+    {
+        "id": "report1",
+        "jobId": "job1",
+        "startTime": "2026-03-01T00:00:00Z",
+        "endTime": "2026-03-02T00:00:00Z",
+        "createTime": "2026-03-02T06:00:00Z",
+        "downloadUrl": "https://storage.googleapis.com/fake/report1.csv",
+    }
+]
+
+FAKE_REPORT_CSV = b"date,views\n2026-03-01,100\n2026-03-02,200\n"
+
+
+class FakeReportingClient:
+    def list_report_types(self, *, include_system_managed=False):
+        return FAKE_REPORT_TYPES
+
+    def list_jobs(self, *, include_system_managed=False):
+        return FAKE_JOBS
+
+    def create_job(self, *, report_type_id, name):
+        return {"id": "job2", "reportTypeId": report_type_id, "name": name, "createTime": "2026-04-01T00:00:00Z"}
+
+    def list_reports(self, job_id, *, created_after=None, start_time_at_or_after=None):
+        return [r for r in FAKE_REPORTS if r["jobId"] == job_id]
+
+    def download_report(self, download_url):
+        return FAKE_REPORT_CSV
+
+
 # ---------------------------------------------------------------------------
 # Core fixtures
 # ---------------------------------------------------------------------------

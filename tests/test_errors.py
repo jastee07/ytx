@@ -1,12 +1,75 @@
 """Error-path tests: verify that API errors and auth failures surface
-the correct error codes and exit codes rather than raw exceptions."""
+the correct error codes and exit codes rather than raw exceptions.
+Also covers map_google_http_error() mapping logic."""
 from __future__ import annotations
 
 import json
 import unittest.mock
+from unittest.mock import MagicMock
 
 import pytest
 from typer.testing import CliRunner
+
+
+# ---------------------------------------------------------------------------
+# map_google_http_error — unit tests
+# ---------------------------------------------------------------------------
+
+
+def _fake_http_error(status: int, reason: str = "test error") -> MagicMock:
+    """Build a minimal mock that looks like googleapiclient.errors.HttpError."""
+    exc = MagicMock()
+    exc.resp = MagicMock()
+    exc.resp.status = status
+    exc.reason = reason
+    return exc
+
+
+class TestMapGoogleHttpError:
+    def _map(self, status, reason="test error"):
+        from ytx.errors import map_google_http_error
+        return map_google_http_error(_fake_http_error(status, reason))
+
+    def test_401_returns_auth_required(self):
+        err = self._map(401)
+        assert err.code == "AUTH_REQUIRED"
+
+    def test_403_quota_reason_returns_quota_exceeded(self):
+        err = self._map(403, "quotaExceeded")
+        assert err.code == "QUOTA_EXCEEDED"
+
+    def test_403_rate_limit_reason_returns_quota_exceeded(self):
+        err = self._map(403, "rateLimitExceeded")
+        assert err.code == "QUOTA_EXCEEDED"
+
+    def test_403_forbidden_returns_insufficient_scope(self):
+        err = self._map(403, "forbidden")
+        assert err.code == "INSUFFICIENT_SCOPE"
+
+    def test_403_insufficient_permissions_returns_insufficient_scope(self):
+        err = self._map(403, "insufficientPermissions")
+        assert err.code == "INSUFFICIENT_SCOPE"
+
+    def test_403_unknown_reason_defaults_to_quota_exceeded(self):
+        err = self._map(403, "someOtherReason")
+        assert err.code == "QUOTA_EXCEEDED"
+
+    def test_404_returns_resource_not_found(self):
+        err = self._map(404)
+        assert err.code == "RESOURCE_NOT_FOUND"
+
+    def test_429_returns_rate_limited(self):
+        err = self._map(429)
+        assert err.code == "RATE_LIMITED"
+
+    def test_500_returns_generic_api_error(self):
+        err = self._map(500)
+        assert err.code == "API_ERROR"
+
+    def test_non_http_error_returns_api_error(self):
+        from ytx.errors import map_google_http_error
+        err = map_google_http_error(ValueError("not an http error"))
+        assert err.code == "API_ERROR"
 
 from ytx.errors import ApiError, AuthError
 

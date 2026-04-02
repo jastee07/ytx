@@ -10,6 +10,7 @@ The current scope is:
 - local profile and token reuse
 - channel metadata and recent-video inventory reads
 - YouTube Analytics queries with a stable JSON envelope
+- YouTube Reporting API (bulk pre-defined reports)
 - JSON and CSV export paths
 - quota-aware, read-only defaults
 
@@ -22,16 +23,18 @@ Do not add write-side YouTube actions unless the user explicitly asks for them.
 - Channel commands: `src/ytx/commands/channel.py`
 - Video commands: `src/ytx/commands/video.py`
 - Analytics commands: `src/ytx/commands/analytics.py`
+- Reporting commands: `src/ytx/commands/reporting.py`
 - Doctor commands: `src/ytx/commands/doctor.py`
 
 ## Core Architecture
 
 - `src/ytx/config.py`
-  Handles local paths, config loading, profile store, secret store, and SQLite cache wiring.
+  Handles local paths (via `platformdirs`), config loading, profile store, secret store, and SQLite cache wiring.
 - `src/ytx/auth/`
   OAuth login flow, credential serialization, secure storage, and profile metadata.
+  `refresh_credentials()` raises `AuthError(code="TOKEN_REFRESH_FAILED")` on revoked tokens or network failures — never a raw exception.
 - `src/ytx/clients/`
-  Thin wrappers over the Google API clients.
+  Thin wrappers over the Google API clients. All clients use `httplib2.Http(timeout=30)` and pass `num_retries=3` to `.execute()` for automatic backoff on transient errors.
 - `src/ytx/services/`
   Business logic for channel reads, video reads, analytics normalization, and quota guidance.
 - `src/ytx/models/`
@@ -40,6 +43,8 @@ Do not add write-side YouTube actions unless the user explicitly asks for them.
   Human, JSON, and CSV output helpers.
 - `src/ytx/utils/`
   Date parsing, metric aliasing, paging, and light utility helpers.
+- `src/ytx/cache/sqlite_cache.py`
+  TTL-based SQLite cache. Supports `list_all()` and `clear(namespace=)` for inspection and invalidation.
 
 ## Product Rules
 
@@ -55,9 +60,29 @@ Do not add write-side YouTube actions unless the user explicitly asks for them.
   - `data`
 - Return deterministic error codes for agent-facing failures.
 
+## Current Command Surface
+
+| Command | Description |
+|---------|-------------|
+| `ytx init` | Initialise config with OAuth client secret path |
+| `ytx auth login/whoami/list-profiles/use/logout/scopes` | OAuth and profile management |
+| `ytx channel get/videos/stats` | Channel metadata and analytics |
+| `ytx video list/get/analytics` | Video inventory and per-video analytics |
+| `ytx analytics query` | Generic Analytics API queries |
+| `ytx reporting list-report-types/list-jobs/create-job/list-reports/download` | Reporting API (bulk CSV reports) |
+| `ytx doctor [scopes\|quota\|token]` | Diagnostics and quota guidance |
+| `ytx doctor cache show` | List all SQLite cache entries |
+| `ytx doctor cache clear [--namespace <ns>]` | Delete cache entries |
+
 ## Current Storage Layout
 
-Expected local files under `~/.config/ytx/`:
+Config directory is resolved via `platformdirs.user_config_dir("ytx")`:
+
+- Linux: `~/.config/ytx/`
+- macOS: `~/Library/Application Support/ytx/`
+- Windows: `%APPDATA%\ytx\`
+
+Files within the config directory:
 
 - `config.toml`
 - `profiles.json`
@@ -66,13 +91,13 @@ Expected local files under `~/.config/ytx/`:
 
 ## Validation
 
-Use:
-
-```powershell
-py -3.13 -m pytest -q
+```bash
+python -m pytest -q
 ```
 
-The repo currently tests deterministic local logic only. Live OAuth and Google API calls require real credentials and should not be added to automated tests.
+Runtime target: Python 3.12+.
+
+The repo tests deterministic local logic only. Live OAuth and Google API calls require real credentials and should not be added to automated tests.
 
 ## Editing Guidance
 
@@ -81,3 +106,4 @@ The repo currently tests deterministic local logic only. Live OAuth and Google A
 - If you add new commands, wire them through the existing formatter and error-envelope helpers instead of inventing a new output shape.
 - Reuse the cache namespaces already present before creating new storage patterns.
 - Keep docs aligned with the implemented command surface.
+- All API client calls must pass `num_retries=3` to `.execute()` to be consistent with the rest of the codebase.
