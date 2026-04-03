@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import typer
 
-from ytx.commands.common import console, render_payload
+from rich.console import Console
+
+from ytx.commands.common import render_payload
 from ytx.config import AppContext
-from ytx.errors import EXIT_CODES
+from ytx.errors import EXIT_CODES, RETRYABLE_CODES
 from ytx.utils.metrics import DIMENSION_ALIASES, FILTER_DIMENSIONS, METRIC_ALIASES
 
 app = typer.Typer(help="Emit machine-readable schema for agent parameter discovery.")
@@ -43,7 +46,7 @@ def schema_show(
         },
         "entities": ["channel", "video"],
         "exit_codes": {
-            code: {"exit_code": exit_code, "retryable": exit_code in {3}}
+            code: {"exit_code": exit_code, "retryable": code in RETRYABLE_CODES}
             for code, exit_code in EXIT_CODES.items()
         },
         "env_vars": {
@@ -68,26 +71,26 @@ def schema_show(
     )
 
 
-def _human_schema(c: object, data: dict) -> None:  # type: ignore[type-arg]
-    console.print("\n[bold]Metrics[/bold]")
+def _human_schema(c: Console, data: dict[str, Any]) -> None:
+    c.print("\n[bold]Metrics[/bold]")
     for alias, info in data["metrics"].items():
-        console.print(f"  {alias:25s}  {info['description']}")
-    console.print("\n[bold]Dimensions[/bold]")
+        c.print(f"  {alias:25s}  {info['description']}")
+    c.print("\n[bold]Dimensions[/bold]")
     for alias, info in data["dimensions"].items():
-        console.print(f"  {alias:25s}  {info['description']}")
-    console.print("\n[bold]Filters[/bold]")
+        c.print(f"  {alias:25s}  {info['description']}")
+    c.print("\n[bold]Filters[/bold]")
     for alias, info in data["filters"].items():
-        console.print(f"  {info['syntax']:35s}  {info['description']}")
-    console.print("\n[bold]Date range[/bold]")
+        c.print(f"  {info['syntax']:35s}  {info['description']}")
+    c.print("\n[bold]Date range[/bold]")
     for key, val in data["date_range"].items():
-        console.print(f"  {key}: {val}")
-    console.print("\n[bold]Exit codes[/bold]")
+        c.print(f"  {key}: {val}")
+    c.print("\n[bold]Exit codes[/bold]")
     for code, info in data["exit_codes"].items():
         retry = " (retryable)" if info["retryable"] else ""
-        console.print(f"  {info['exit_code']}  {code}{retry}")
-    console.print("\n[bold]Env vars[/bold]")
+        c.print(f"  {info['exit_code']}  {code}{retry}")
+    c.print("\n[bold]Env vars[/bold]")
     for var, info in data["env_vars"].items():
-        console.print(f"  {var}: {info['description']}")
+        c.print(f"  {var}: {info['description']}")
 
 
 _METRIC_DESCRIPTIONS: dict[str, str] = {

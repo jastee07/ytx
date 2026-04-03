@@ -24,6 +24,9 @@ EXIT_CODES: dict[str, int] = {
     "INVALID_DATE_RANGE": 6,
 }
 
+# Error codes that are safe to retry after a back-off delay.
+RETRYABLE_CODES: frozenset[str] = frozenset({"QUOTA_EXCEEDED", "RATE_LIMITED"})
+
 
 @dataclass
 class YtxError(Exception):

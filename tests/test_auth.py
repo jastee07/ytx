@@ -65,9 +65,9 @@ class TestAuthUse:
         assert result.exit_code == 0
         assert "work" in result.output
 
-    def test_unknown_profile_exits_1(self, patch_ctx):
+    def test_unknown_profile_exits_2(self, patch_ctx):
         result = runner.invoke(app, ["use", "nonexistent"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
 
 
 class TestAuthLogout:
