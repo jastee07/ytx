@@ -56,7 +56,7 @@ def video_list(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("get")
@@ -84,7 +84,7 @@ def video_get(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 DEFAULT_VIDEO_METRICS = "views,watch_time"
@@ -137,4 +137,4 @@ def video_analytics(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)

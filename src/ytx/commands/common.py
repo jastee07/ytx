@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, Callable
 
@@ -38,6 +39,11 @@ def render_payload(
     output: Path | None,
     human_renderer: Callable[[Console, dict[str, Any]], None],
 ) -> None:
+    ytx_output = os.environ.get("YTX_OUTPUT", "").lower()
+    if ytx_output == "json":
+        as_json = True
+    elif ytx_output == "csv":
+        as_csv = True
     if as_json and as_csv:
         raise ValidationError(code="API_ERROR", message="Use only one of --json or --csv.")
     envelope = build_envelope(api=api, profile_name=profile_name, data=data)

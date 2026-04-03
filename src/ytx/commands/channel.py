@@ -51,7 +51,7 @@ def channel_get(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("videos")
@@ -81,7 +81,7 @@ def channel_videos(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("stats")
@@ -125,4 +125,4 @@ def channel_stats(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)

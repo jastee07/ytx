@@ -28,4 +28,5 @@ class ErrorEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     ok: Literal[False] = False
+    generated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z"))
     error: ErrorDetail

@@ -56,7 +56,7 @@ def auth_login(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("whoami")
@@ -88,7 +88,7 @@ def auth_whoami(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("list-profiles")
@@ -114,7 +114,7 @@ def auth_use(profile_name: str) -> None:
     ctx = AppContext()
     if ctx.profile_store.get_profile(profile_name) is None:
         console.print(f"[red]AUTH_REQUIRED[/red]: Profile '{profile_name}' is not configured.")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
     ctx.profile_store.set_default_profile(profile_name)
     settings = ctx.settings
     settings.default_profile = profile_name
@@ -155,7 +155,7 @@ def auth_scopes(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 def init_command(

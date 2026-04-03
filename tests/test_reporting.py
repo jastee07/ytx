@@ -47,12 +47,12 @@ class TestListReportTypes:
         result = runner.invoke(app, ["list-report-types"])
         assert result.exit_code == 0
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["list-report-types", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -69,12 +69,12 @@ class TestListJobs:
         assert data["ok"] is True
         assert data["data"]["items"][0]["id"] == "job1"
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["list-jobs", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -94,14 +94,14 @@ class TestCreateJob:
         assert data["data"]["id"] == "job2"
         assert data["data"]["name"] == "New job"
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(
             app, ["create-job", "--report-type-id", "rtype1", "--name", "x", "--json"]
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -124,12 +124,12 @@ class TestListReports:
         data = json.loads(result.output)
         assert data["data"]["items"] == []
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["list-reports", "--job-id", "job1", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -153,11 +153,11 @@ class TestDownload:
         assert rows[0]["date"] == "2026-03-01"
         assert rows[0]["views"] == "100"
 
-    def test_report_not_found_exits_1(self, fake_reporting):
+    def test_report_not_found_exits_5(self, fake_reporting):
         result = runner.invoke(
             app, ["download", "--job-id", "job1", "--report-id", "no-such-report", "--json"]
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 5
         data = json.loads(result.output)
         assert data["error"]["code"] == "RESOURCE_NOT_FOUND"
 
@@ -171,12 +171,12 @@ class TestDownload:
         assert out.exists()
         assert b"views" in out.read_bytes()
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(
             app, ["download", "--job-id", "job1", "--report-id", "report1", "--json"]
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"

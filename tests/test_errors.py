@@ -50,9 +50,9 @@ class TestMapGoogleHttpError:
         err = self._map(403, "insufficientPermissions")
         assert err.code == "INSUFFICIENT_SCOPE"
 
-    def test_403_unknown_reason_defaults_to_quota_exceeded(self):
+    def test_403_unknown_reason_defaults_to_api_error(self):
         err = self._map(403, "someOtherReason")
-        assert err.code == "QUOTA_EXCEEDED"
+        assert err.code == "API_ERROR"
 
     def test_404_returns_resource_not_found(self):
         err = self._map(404)
@@ -118,22 +118,22 @@ class TestChannelGetApiErrors:
 
     def test_quota_exceeded(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="QUOTA_EXCEEDED", message="Daily quota limit reached."))
-        assert result.exit_code == 1
+        assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "QUOTA_EXCEEDED"
 
     def test_resource_not_found(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="RESOURCE_NOT_FOUND", message="Channel not found."))
-        assert result.exit_code == 1
+        assert result.exit_code == 5
         assert json.loads(result.output)["error"]["code"] == "RESOURCE_NOT_FOUND"
 
     def test_insufficient_scope_from_api(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="INSUFFICIENT_SCOPE", message="Missing OAuth scope."))
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
     def test_rate_limited(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests."))
-        assert result.exit_code == 1
+        assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "RATE_LIMITED"
 
 
@@ -152,12 +152,12 @@ class TestVideoGetApiErrors:
 
     def test_resource_not_found(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="RESOURCE_NOT_FOUND", message="Video not found: vid999"))
-        assert result.exit_code == 1
+        assert result.exit_code == 5
         assert json.loads(result.output)["error"]["code"] == "RESOURCE_NOT_FOUND"
 
     def test_rate_limited(self, app_ctx):
         result = self._invoke(app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests."))
-        assert result.exit_code == 1
+        assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "RATE_LIMITED"
 
 
@@ -167,14 +167,14 @@ class TestVideoGetApiErrors:
 
 
 class TestTokenRefreshFailure:
-    def test_refresh_failure_exits_1(self, app_ctx):
+    def test_refresh_failure_exits_2(self, app_ctx):
         from ytx.commands.channel import app
 
         err = AuthError(code="TOKEN_REFRESH_FAILED", message="Token was revoked. Run 'ytx auth login'.")
         with unittest.mock.patch("ytx.commands.channel.AppContext", return_value=app_ctx):
             with unittest.mock.patch("ytx.commands.channel.load_data_client", side_effect=err):
                 result = runner.invoke(app, ["get", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         assert json.loads(result.output)["error"]["code"] == "TOKEN_REFRESH_FAILED"
 
 

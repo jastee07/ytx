@@ -47,18 +47,18 @@ class TestChannelGet:
         assert result.exit_code == 0
         assert "Test Channel" in result.output
 
-    def test_no_profile_exits_1(self, patch_ctx):
+    def test_no_profile_exits_2(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(profiles={})
         result = runner.invoke(app, ["get", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         assert json.loads(result.output)["error"]["code"] == "AUTH_REQUIRED"
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["get", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -75,12 +75,12 @@ class TestChannelVideos:
         result = runner.invoke(app, ["videos", "--csv"])
         assert result.exit_code == 0
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["videos", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -94,10 +94,10 @@ class TestChannelStats:
         assert "rows" in data["data"]
         assert "totals" in data["data"]
 
-    def test_missing_analytics_scope_exits_1(self, patch_ctx):
+    def test_missing_analytics_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[YT_READONLY])}
         )
         result = runner.invoke(app, ["stats", "--range", "7d", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
