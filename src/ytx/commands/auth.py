@@ -18,6 +18,7 @@ app = typer.Typer(help="Authentication and profile management.")
 def auth_login(
     profile: str | None = typer.Option(None, "--profile"),
     client_secret_path: Path | None = typer.Option(None, "--client-secret-path"),
+    headless: bool = typer.Option(False, "--headless", help="Print auth URL and prompt for code instead of opening a browser. Use this on remote/VM environments."),
     as_json: bool = typer.Option(False, "--json"),
     output: Path | None = typer.Option(None, "--output"),
 ) -> None:
@@ -30,7 +31,7 @@ def auth_login(
                 code="AUTH_REQUIRED",
                 message="No OAuth client secret configured. Run 'ytx init' or pass --client-secret-path.",
             )
-        credentials = run_installed_app_flow(str(secret_path), ctx.settings.scopes, port=ctx.settings.local_oauth_port)
+        credentials = run_installed_app_flow(str(secret_path), ctx.settings.scopes, port=ctx.settings.local_oauth_port, headless=headless)
         ctx.secret_store.save_json(profile_name, credentials_to_json(credentials))
         channel = normalize_channel(load_data_client(ctx, profile_name).get_mine_channel())
         metadata = ctx.profile_store.upsert_profile(
