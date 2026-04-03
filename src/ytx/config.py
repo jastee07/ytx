@@ -50,7 +50,11 @@ class AppContext:
 
 
 def build_paths() -> AppPaths:
-    root = Path.home() / ".config" / "ytx"
+    try:
+        from platformdirs import user_config_dir
+        root = Path(user_config_dir("ytx", appauthor=False))
+    except ImportError:
+        root = Path.home() / ".config" / "ytx"
     root.mkdir(parents=True, exist_ok=True)
     return AppPaths(
         root=root,

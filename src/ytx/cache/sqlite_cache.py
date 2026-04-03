@@ -77,3 +77,23 @@ class SQLiteCache:
         cache_key = f"{namespace}:{key}"
         with self._connect() as conn:
             conn.execute("DELETE FROM cache_entries WHERE cache_key = ?", (cache_key,))
+
+    def list_all(self) -> list[dict[str, Any]]:
+        """Return metadata for all cache entries (expired or not)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT namespace, cache_key, expires_at, created_at FROM cache_entries ORDER BY namespace, cache_key"
+            ).fetchall()
+        return [
+            {"namespace": r[0], "cache_key": r[1], "expires_at": r[2], "created_at": r[3]}
+            for r in rows
+        ]
+
+    def clear(self, namespace: str | None = None) -> int:
+        """Delete cache entries, optionally filtered to a namespace. Returns count deleted."""
+        with self._connect() as conn:
+            if namespace:
+                cursor = conn.execute("DELETE FROM cache_entries WHERE namespace = ?", (namespace,))
+            else:
+                cursor = conn.execute("DELETE FROM cache_entries")
+            return cursor.rowcount

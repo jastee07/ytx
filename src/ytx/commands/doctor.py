@@ -11,6 +11,8 @@ from ytx.errors import YtxError
 from ytx.services.quota_service import command_quota_notes, known_expensive_paths
 
 app = typer.Typer(help="Diagnostics and quota guidance.")
+cache_app = typer.Typer(help="Inspect and clear the local response cache.")
+app.add_typer(cache_app, name="cache")
 
 
 @app.command()
@@ -92,6 +94,45 @@ def doctor_quota(
             render_rows(c, "Quota Costs", {"items": d["items"]}),
             [console.print(note) for note in d["notes"]],
         ),
+    )
+
+
+@cache_app.command("show")
+def doctor_cache_show(
+    as_json: bool = typer.Option(False, "--json"),
+    output: Path | None = typer.Option(None, "--output"),
+) -> None:
+    """List all entries currently in the local SQLite cache."""
+    ctx = AppContext()
+    entries = ctx.cache.list_all()
+    render_payload(
+        api="cache",
+        profile_name=ctx.profile_store.default_profile(),
+        data={"items": entries, "total": len(entries)},
+        as_json=as_json,
+        as_csv=False,
+        output=output,
+        human_renderer=lambda c, d: render_rows(c, "Cache entries", d),
+    )
+
+
+@cache_app.command("clear")
+def doctor_cache_clear(
+    namespace: str | None = typer.Option(None, "--namespace", help="Only clear entries in this namespace."),
+    as_json: bool = typer.Option(False, "--json"),
+    output: Path | None = typer.Option(None, "--output"),
+) -> None:
+    """Delete cached entries, optionally scoped to a namespace."""
+    ctx = AppContext()
+    deleted = ctx.cache.clear(namespace=namespace)
+    render_payload(
+        api="cache",
+        profile_name=ctx.profile_store.default_profile(),
+        data={"deleted": deleted, "namespace": namespace or "all"},
+        as_json=as_json,
+        as_csv=False,
+        output=output,
+        human_renderer=lambda c, d: render_rows(c, "Cache cleared", d),
     )
 
 

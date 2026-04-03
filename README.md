@@ -39,7 +39,7 @@ pip install -e .[dev]
 Run tests with:
 
 ```bash
-py -3.13 -m pytest -q
+python -m pytest -q
 ```
 
-Runtime target: Python 3.13+.
+Runtime target: Python 3.12+.

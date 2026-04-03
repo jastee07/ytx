@@ -40,10 +40,22 @@ def refresh_credentials(credentials: Any) -> None:
     if not credentials.refresh_token:
         raise AuthError(code="TOKEN_REFRESH_FAILED", message="Credentials do not contain a refresh token.")
     try:
+        import google.auth.exceptions
         from google.auth.transport.requests import Request
     except ImportError as exc:
         raise AuthError(code="TOKEN_REFRESH_FAILED", message="google-auth transport support is required.") from exc
-    credentials.refresh(Request())
+    try:
+        credentials.refresh(Request())
+    except google.auth.exceptions.RefreshError as exc:
+        raise AuthError(
+            code="TOKEN_REFRESH_FAILED",
+            message=f"Token refresh failed — the credential may have been revoked. Run 'ytx auth login' to re-authenticate. ({exc})",
+        ) from exc
+    except google.auth.exceptions.TransportError as exc:
+        raise AuthError(
+            code="TOKEN_REFRESH_FAILED",
+            message=f"Network error during token refresh: {exc}",
+        ) from exc
 
 
 def persist_credentials(secret_store: KeyringBackedStore, profile_name: str, credentials: Any) -> None:

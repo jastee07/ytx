@@ -8,17 +8,20 @@ from ytx.errors import ApiError, map_google_http_error
 class YouTubeDataClient:
     def __init__(self, credentials: Any) -> None:
         try:
+            import httplib2
+            from google_auth_httplib2 import AuthorizedHttp
             from googleapiclient.discovery import build
         except ImportError as exc:
             raise ApiError(code="API_ERROR", message="google-api-python-client is required for YouTube Data access.") from exc
-        self._service = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+        http = AuthorizedHttp(credentials, http=httplib2.Http(timeout=30))
+        self._service = build("youtube", "v3", http=http, cache_discovery=False)
 
     def get_mine_channel(self) -> dict[str, Any]:
         try:
             response = (
                 self._service.channels()
                 .list(part="id,snippet,statistics,contentDetails,brandingSettings", mine=True)
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -41,7 +44,7 @@ class YouTubeDataClient:
                     maxResults=max_results,
                     pageToken=page_token,
                 )
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
@@ -53,7 +56,7 @@ class YouTubeDataClient:
             response = (
                 self._service.videos()
                 .list(part="id,snippet,contentDetails,statistics,status", id=",".join(video_ids))
-                .execute()
+                .execute(num_retries=3)
             )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
