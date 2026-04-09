@@ -1,4 +1,5 @@
 """Unit tests for ytx/clients/youtube_data.py."""
+
 from __future__ import annotations
 
 import unittest.mock
@@ -23,7 +24,9 @@ def _make_client(service_mock):
 
 def _chain(*return_value):
     """Build a mock that supports .foo().bar().execute() chaining."""
-    execute = unittest.mock.MagicMock(return_value=return_value[0] if return_value else {})
+    execute = unittest.mock.MagicMock(
+        return_value=return_value[0] if return_value else {}
+    )
     inner = unittest.mock.MagicMock()
     inner.execute = execute
     outer = unittest.mock.MagicMock(return_value=inner)
@@ -54,10 +57,13 @@ class TestGetMineChannel:
 
     def test_propagates_http_error(self):
         from googleapiclient.errors import HttpError
+
         svc = unittest.mock.MagicMock()
         resp = unittest.mock.MagicMock()
         resp.status = 403
-        svc.channels().list().execute.side_effect = HttpError(resp=resp, content=b"Forbidden")
+        svc.channels().list().execute.side_effect = HttpError(
+            resp=resp, content=b"Forbidden"
+        )
         client = _make_client(svc)
         with pytest.raises(ApiError):
             client.get_mine_channel()
@@ -87,7 +93,10 @@ class TestGetUploadsPlaylistId:
 
 class TestListPlaylistItems:
     def test_returns_api_response(self):
-        fake_resp = {"items": [{"contentDetails": {"videoId": "vid1"}}], "nextPageToken": None}
+        fake_resp = {
+            "items": [{"contentDetails": {"videoId": "vid1"}}],
+            "nextPageToken": None,
+        }
         svc = unittest.mock.MagicMock()
         svc.playlistItems().list().execute.return_value = fake_resp
         client = _make_client(svc)
@@ -108,10 +117,13 @@ class TestListPlaylistItems:
 
     def test_propagates_http_error(self):
         from googleapiclient.errors import HttpError
+
         svc = unittest.mock.MagicMock()
         resp = unittest.mock.MagicMock()
         resp.status = 500
-        svc.playlistItems().list().execute.side_effect = HttpError(resp=resp, content=b"Server Error")
+        svc.playlistItems().list().execute.side_effect = HttpError(
+            resp=resp, content=b"Server Error"
+        )
         client = _make_client(svc)
         with pytest.raises(ApiError):
             client.list_playlist_items("UUPL123", max_results=10)

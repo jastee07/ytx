@@ -1,4 +1,5 @@
 """Unit tests for ytx/clients/youtube_analytics.py."""
+
 from __future__ import annotations
 
 import unittest.mock
@@ -133,10 +134,13 @@ class TestQuery:
 
     def test_propagates_http_error(self):
         from googleapiclient.errors import HttpError
+
         svc = unittest.mock.MagicMock()
         resp = unittest.mock.MagicMock()
         resp.status = 403
-        svc.reports().query().execute.side_effect = HttpError(resp=resp, content=b"Forbidden")
+        svc.reports().query().execute.side_effect = HttpError(
+            resp=resp, content=b"Forbidden"
+        )
         client = _make_client(svc)
         with pytest.raises(ApiError):
             client.query(
