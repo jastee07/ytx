@@ -111,6 +111,35 @@ def reporting_create_job(
         raise typer.Exit(code=error.exit_code)
 
 
+@app.command("delete-job")
+def reporting_delete_job(
+    job_id: str = typer.Option(..., "--job-id"),
+    profile: str | None = typer.Option(None, "--profile"),
+    as_json: bool = typer.Option(False, "--json"),
+    output: Path | None = typer.Option(None, "--output"),
+) -> None:
+    """Delete a reporting job by ID."""
+    ctx = AppContext()
+    profile_name = ctx.resolve_profile_name(profile)
+    try:
+        profile_meta = get_profile_metadata(ctx, profile_name)
+        require_capability(profile_meta, READ_REPORTING)
+        client = load_reporting_client(ctx, profile_name)
+        client.delete_job(job_id)
+        render_payload(
+            api="youtube_reporting",
+            profile_name=profile_name,
+            data={"deleted": True, "job_id": job_id},
+            as_json=as_json,
+            as_csv=False,
+            output=output,
+            human_renderer=lambda c, d: c.print(f"Deleted job {job_id}"),
+        )
+    except YtxError as error:
+        render_error(error, as_json=as_json, output=output)
+        raise typer.Exit(code=1)
+
+
 @app.command("list-reports")
 def reporting_list_reports(
     job_id: str = typer.Option(..., "--job-id"),
