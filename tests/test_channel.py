@@ -6,7 +6,13 @@ import unittest.mock
 import pytest
 from typer.testing import CliRunner
 
-from conftest import FakeAnalyticsClient, FakeDataClient, FakeProfileStore, YT_READONLY, make_profile
+from conftest import (
+    FakeAnalyticsClient,
+    FakeDataClient,
+    FakeProfileStore,
+    YT_READONLY,
+    make_profile,
+)
 from ytx.commands.channel import app
 
 runner = CliRunner()
@@ -21,14 +27,18 @@ def patch_ctx(app_ctx):
 @pytest.fixture
 def fake_data(patch_ctx):
     client = FakeDataClient()
-    with unittest.mock.patch("ytx.commands.channel.load_data_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.channel.load_data_client", return_value=client
+    ):
         yield client
 
 
 @pytest.fixture
 def fake_analytics(patch_ctx):
     client = FakeAnalyticsClient()
-    with unittest.mock.patch("ytx.commands.channel.load_analytics_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.channel.load_analytics_client", return_value=client
+    ):
         yield client
 
 

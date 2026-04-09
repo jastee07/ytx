@@ -55,7 +55,9 @@ def analytics_query(
             )
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_ANALYTICS)
-        resolved_start, resolved_end = parse_date_range(range_value, start_date, end_date)
+        resolved_start, resolved_end = parse_date_range(
+            range_value, start_date, end_date
+        )
         query = AnalyticsQuery(
             entity=entity,
             start_date=resolved_start,
@@ -67,7 +69,9 @@ def analytics_query(
             max_results=max_results,
             video_id=video_id,
         )
-        report = AnalyticsService(load_analytics_client(ctx, profile_name), ctx.cache).query(query)
+        report = AnalyticsService(
+            load_analytics_client(ctx, profile_name), ctx.cache
+        ).query(query)
         render_payload(
             api="youtube_analytics",
             profile_name=profile_name,

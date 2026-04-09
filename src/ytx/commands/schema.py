@@ -28,15 +28,25 @@ def schema_show(
     ctx = AppContext()
     data = {
         "metrics": {
-            alias: {"description": _METRIC_DESCRIPTIONS.get(alias, ""), "api_name": api_name}
+            alias: {
+                "description": _METRIC_DESCRIPTIONS.get(alias, ""),
+                "api_name": api_name,
+            }
             for alias, api_name in METRIC_ALIASES.items()
         },
         "dimensions": {
-            alias: {"description": _DIMENSION_DESCRIPTIONS.get(alias, ""), "api_name": api_name}
+            alias: {
+                "description": _DIMENSION_DESCRIPTIONS.get(alias, ""),
+                "api_name": api_name,
+            }
             for alias, api_name in DIMENSION_ALIASES.items()
         },
         "filters": {
-            alias: {"description": _FILTER_DESCRIPTIONS.get(alias, ""), "api_name": api_name, "syntax": f"{alias}==<value>"}
+            alias: {
+                "description": _FILTER_DESCRIPTIONS.get(alias, ""),
+                "api_name": api_name,
+                "syntax": f"{alias}==<value>",
+            }
             for alias, api_name in FILTER_DIMENSIONS.items()
         },
         "date_range": {

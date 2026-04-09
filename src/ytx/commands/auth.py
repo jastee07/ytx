@@ -18,27 +18,46 @@ app = typer.Typer(help="Authentication and profile management.")
 def auth_login(
     profile: str | None = typer.Option(None, "--profile"),
     client_secret_path: Path | None = typer.Option(None, "--client-secret-path"),
-    headless: bool = typer.Option(False, "--headless", help="Print auth URL and prompt for code instead of opening a browser. Use this on remote/VM environments."),
+    headless: bool = typer.Option(
+        False,
+        "--headless",
+        help="Print auth URL and prompt for code instead of opening a browser. Use this on remote/VM environments.",
+    ),
     as_json: bool = typer.Option(False, "--json"),
     output: Path | None = typer.Option(None, "--output"),
 ) -> None:
     ctx = AppContext()
     profile_name = ctx.resolve_profile_name(profile)
     try:
-        secret_path = client_secret_path or (Path(ctx.settings.client_secret_path) if ctx.settings.client_secret_path else None)
+        secret_path = client_secret_path or (
+            Path(ctx.settings.client_secret_path)
+            if ctx.settings.client_secret_path
+            else None
+        )
         if secret_path is None:
             raise AuthError(
                 code="AUTH_REQUIRED",
                 message="No OAuth client secret configured. Run 'ytx init' or pass --client-secret-path.",
             )
-        credentials = run_installed_app_flow(str(secret_path), ctx.settings.scopes, port=ctx.settings.local_oauth_port, headless=headless)
+        credentials = run_installed_app_flow(
+            str(secret_path),
+            ctx.settings.scopes,
+            port=ctx.settings.local_oauth_port,
+            headless=headless,
+        )
         ctx.secret_store.save_json(profile_name, credentials_to_json(credentials))
-        channel = normalize_channel(load_data_client(ctx, profile_name).get_mine_channel())
+        channel = normalize_channel(
+            load_data_client(ctx, profile_name).get_mine_channel()
+        )
         metadata = ctx.profile_store.upsert_profile(
             profile_name,
             channel_id=channel.channel_id,
             channel_title=channel.title,
-            granted_scopes=list(getattr(credentials, "granted_scopes", None) or getattr(credentials, "scopes", None) or ctx.settings.scopes),
+            granted_scopes=list(
+                getattr(credentials, "granted_scopes", None)
+                or getattr(credentials, "scopes", None)
+                or ctx.settings.scopes
+            ),
         )
         render_payload(
             api="youtube_data",
@@ -113,7 +132,9 @@ def auth_list_profiles(
 def auth_use(profile_name: str) -> None:
     ctx = AppContext()
     if ctx.profile_store.get_profile(profile_name) is None:
-        console.print(f"[red]AUTH_REQUIRED[/red]: Profile '{profile_name}' is not configured.")
+        console.print(
+            f"[red]AUTH_REQUIRED[/red]: Profile '{profile_name}' is not configured."
+        )
         raise typer.Exit(code=EXIT_CODES.get("AUTH_REQUIRED", 1))
     ctx.profile_store.set_default_profile(profile_name)
     settings = ctx.settings
@@ -143,7 +164,11 @@ def auth_scopes(
     profile_name = ctx.resolve_profile_name(profile)
     try:
         profile_meta = get_profile_metadata(ctx, profile_name)
-        data = {"items": [{"scope": scope} for scope in profile_meta.get("granted_scopes", [])]}
+        data = {
+            "items": [
+                {"scope": scope} for scope in profile_meta.get("granted_scopes", [])
+            ]
+        }
         render_payload(
             api="youtube_data",
             profile_name=profile_name,
@@ -159,7 +184,9 @@ def auth_scopes(
 
 
 def init_command(
-    client_secret_path: Path = typer.Option(..., prompt=True, exists=True, file_okay=True, dir_okay=False),
+    client_secret_path: Path = typer.Option(
+        ..., prompt=True, exists=True, file_okay=True, dir_okay=False
+    ),
     default_profile: str = typer.Option("default", prompt=True),
     enable_analytics: bool = typer.Option(True, prompt=True),
     enable_monetary: bool = typer.Option(False, prompt=True),

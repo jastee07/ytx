@@ -13,7 +13,9 @@ COMMAND_COSTS = {
 def known_expensive_paths() -> list[dict[str, int | str]]:
     return [
         {"method": method, "estimated_cost": cost}
-        for method, cost in sorted(COMMAND_COSTS.items(), key=lambda item: item[1], reverse=True)
+        for method, cost in sorted(
+            COMMAND_COSTS.items(), key=lambda item: item[1], reverse=True
+        )
     ]
 
 

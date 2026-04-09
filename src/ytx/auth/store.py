@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from base64 import urlsafe_b64decode, urlsafe_b64encode
 from pathlib import Path
 import json
 from typing import Any
@@ -35,7 +34,10 @@ class LocalSecretStore:
         try:
             raw = self._fernet().decrypt(path.read_bytes())
         except InvalidToken as exc:
-            raise AuthError(code="TOKEN_REFRESH_FAILED", message="Stored credentials could not be decrypted.") from exc
+            raise AuthError(
+                code="TOKEN_REFRESH_FAILED",
+                message="Stored credentials could not be decrypted.",
+            ) from exc
         return json.loads(raw.decode("utf-8"))
 
     def delete(self, name: str) -> None:

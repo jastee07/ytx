@@ -50,6 +50,7 @@ class DictCache:
 # Tests
 # ---------------------------------------------------------------------------
 
+
 def test_get_video_returns_summary() -> None:
     service = VideoService(FakeDataClient(), DictCache())
     video = service.get_video("vidABC")

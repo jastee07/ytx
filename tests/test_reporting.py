@@ -1,4 +1,5 @@
 """Tests for the ytx reporting commands (commands/reporting.py)."""
+
 from __future__ import annotations
 
 import json
@@ -24,7 +25,9 @@ def patch_ctx(app_ctx):
 @pytest.fixture
 def fake_reporting(patch_ctx):
     client = FakeReportingClient()
-    with unittest.mock.patch("ytx.commands.reporting.load_reporting_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.reporting.load_reporting_client", return_value=client
+    ):
         yield client
 
 
@@ -86,7 +89,8 @@ class TestListJobs:
 class TestCreateJob:
     def test_json_output_contains_new_job(self, fake_reporting):
         result = runner.invoke(
-            app, ["create-job", "--report-type-id", "rtype1", "--name", "New job", "--json"]
+            app,
+            ["create-job", "--report-type-id", "rtype1", "--name", "New job", "--json"],
         )
         assert result.exit_code == 0
         data = json.loads(result.output)
@@ -119,7 +123,9 @@ class TestListReports:
         assert data["data"]["items"][0]["id"] == "report1"
 
     def test_unknown_job_returns_empty(self, fake_reporting):
-        result = runner.invoke(app, ["list-reports", "--job-id", "no-such-job", "--json"])
+        result = runner.invoke(
+            app, ["list-reports", "--job-id", "no-such-job", "--json"]
+        )
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["data"]["items"] == []
@@ -155,7 +161,8 @@ class TestDownload:
 
     def test_report_not_found_exits_5(self, fake_reporting):
         result = runner.invoke(
-            app, ["download", "--job-id", "job1", "--report-id", "no-such-report", "--json"]
+            app,
+            ["download", "--job-id", "job1", "--report-id", "no-such-report", "--json"],
         )
         assert result.exit_code == 5
         data = json.loads(result.output)
@@ -165,7 +172,15 @@ class TestDownload:
         out = tmp_path / "report.csv"
         result = runner.invoke(
             app,
-            ["download", "--job-id", "job1", "--report-id", "report1", "--output", str(out)],
+            [
+                "download",
+                "--job-id",
+                "job1",
+                "--report-id",
+                "report1",
+                "--output",
+                str(out),
+            ],
         )
         assert result.exit_code == 0
         assert out.exists()

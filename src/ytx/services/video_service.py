@@ -15,5 +15,7 @@ class VideoService:
         if cached:
             return VideoSummary.model_validate(cached)
         video = normalize_video(self.client.get_video(video_id))
-        self.cache.set("video_details", video_id, video.model_dump(), ttl_seconds=30 * 60)
+        self.cache.set(
+            "video_details", video_id, video.model_dump(), ttl_seconds=30 * 60
+        )
         return video

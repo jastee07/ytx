@@ -9,7 +9,11 @@ from rich.console import Console
 from ytx.models.common import Envelope, ErrorEnvelope
 
 
-def emit_json(console: Console, payload: Envelope | ErrorEnvelope | dict[str, Any], output: Path | None = None) -> None:
+def emit_json(
+    console: Console,
+    payload: Envelope | ErrorEnvelope | dict[str, Any],
+    output: Path | None = None,
+) -> None:
     if hasattr(payload, "model_dump"):
         data = payload.model_dump()
     else:

@@ -75,16 +75,28 @@ def map_google_http_error(exc: Exception) -> ApiError:
         pass
 
     if status == 401:
-        return ApiError(code="AUTH_REQUIRED", message=f"Authentication required: {reason}")
+        return ApiError(
+            code="AUTH_REQUIRED", message=f"Authentication required: {reason}"
+        )
     if status == 403:
         lower = reason.lower()
-        if "quota" in lower or "rateLimitExceeded" in reason or "userRateLimitExceeded" in reason:
+        if (
+            "quota" in lower
+            or "rateLimitExceeded" in reason
+            or "userRateLimitExceeded" in reason
+        ):
             return ApiError(code="QUOTA_EXCEEDED", message=f"Quota exceeded: {reason}")
         if "forbidden" in lower or "insufficientPermissions" in reason:
-            return ApiError(code="INSUFFICIENT_SCOPE", message=f"Insufficient permissions: {reason}")
+            return ApiError(
+                code="INSUFFICIENT_SCOPE", message=f"Insufficient permissions: {reason}"
+            )
         return ApiError(code="API_ERROR", message=f"Forbidden: {reason}")
     if status == 404:
-        return ApiError(code="RESOURCE_NOT_FOUND", message=f"Resource not found: {reason}")
+        return ApiError(
+            code="RESOURCE_NOT_FOUND", message=f"Resource not found: {reason}"
+        )
     if status == 429:
         return ApiError(code="RATE_LIMITED", message=f"Rate limited: {reason}")
-    return ApiError(code="API_ERROR", message=f"YouTube API error (HTTP {status}): {reason}")
+    return ApiError(
+        code="API_ERROR", message=f"YouTube API error (HTTP {status}): {reason}"
+    )
