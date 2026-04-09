@@ -225,6 +225,9 @@ class FakeReportingClient:
     def list_reports(self, job_id, *, created_after=None, start_time_at_or_after=None):
         return [r for r in FAKE_REPORTS if r["jobId"] == job_id]
 
+    def delete_job(self, job_id):
+        pass  # no-op; tests assert exit code / output
+
     def download_report(self, download_url):
         return FAKE_REPORT_CSV
 
