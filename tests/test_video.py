@@ -49,12 +49,12 @@ class TestVideoList:
         assert len(items) == 1
         assert items[0]["video_id"] == "vid1"
 
-    def test_missing_scope_exits_1(self, patch_ctx):
+    def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}
         )
         result = runner.invoke(app, ["list", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
@@ -67,9 +67,9 @@ class TestVideoGet:
         assert data["data"]["video_id"] == "vid1"
         assert data["data"]["title"] == "Video One"
 
-    def test_not_found_exits_1(self, fake_data):
+    def test_not_found_exits_5(self, fake_data):
         result = runner.invoke(app, ["get", "missing_id", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 5
         data = json.loads(result.output)
         assert data["ok"] is False
         assert data["error"]["code"] == "RESOURCE_NOT_FOUND"
@@ -89,10 +89,10 @@ class TestVideoAnalytics:
         assert data["api"] == "youtube_analytics"
         assert "rows" in data["data"]
 
-    def test_missing_analytics_scope_exits_1(self, patch_ctx):
+    def test_missing_analytics_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[YT_READONLY])}
         )
         result = runner.invoke(app, ["analytics", "vid1", "--range", "7d", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"

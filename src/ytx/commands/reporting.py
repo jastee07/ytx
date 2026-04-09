@@ -48,7 +48,7 @@ def reporting_list_report_types(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("list-jobs")
@@ -78,7 +78,7 @@ def reporting_list_jobs(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("create-job")
@@ -108,7 +108,7 @@ def reporting_create_job(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("list-reports")
@@ -144,7 +144,7 @@ def reporting_list_reports(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("download")
@@ -198,4 +198,4 @@ def reporting_download(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)

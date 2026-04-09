@@ -28,9 +28,9 @@ class TestAuthWhoami:
         assert data["data"]["channel_id"] == "UC123"
         assert data["data"]["channel_title"] == "Test Channel"
 
-    def test_unknown_profile_exits_1(self, patch_ctx):
+    def test_unknown_profile_exits_2(self, patch_ctx):
         result = runner.invoke(app, ["whoami", "--profile", "ghost", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         data = json.loads(result.output)
         assert data["ok"] is False
         assert data["error"]["code"] == "AUTH_REQUIRED"
@@ -65,9 +65,9 @@ class TestAuthUse:
         assert result.exit_code == 0
         assert "work" in result.output
 
-    def test_unknown_profile_exits_1(self, patch_ctx):
+    def test_unknown_profile_exits_2(self, patch_ctx):
         result = runner.invoke(app, ["use", "nonexistent"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
 
 
 class TestAuthLogout:
@@ -85,20 +85,20 @@ class TestAuthScopes:
         scopes = [item["scope"] for item in data["data"]["items"]]
         assert YT_READONLY in scopes
 
-    def test_unknown_profile_exits_1(self, patch_ctx):
+    def test_unknown_profile_exits_2(self, patch_ctx):
         result = runner.invoke(app, ["scopes", "--profile", "nobody", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         data = json.loads(result.output)
         assert data["ok"] is False
         assert data["error"]["code"] == "AUTH_REQUIRED"
 
 
 class TestAuthLogin:
-    def test_no_client_secret_configured_exits_1(self, patch_ctx):
+    def test_no_client_secret_configured_exits_2(self, patch_ctx):
         # Settings has no client_secret_path → AuthError before OAuth flow starts
         patch_ctx.settings.client_secret_path = None
         result = runner.invoke(app, ["login", "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         # The error message contains a newline so strict JSON parsing fails;
         # check for the error code as a string instead.
         assert '"AUTH_REQUIRED"' in result.output

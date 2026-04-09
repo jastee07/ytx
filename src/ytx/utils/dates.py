@@ -12,6 +12,11 @@ def today_utc() -> date:
     return datetime.now(UTC).date()
 
 
+def iso_now() -> str:
+    """Return current UTC time as an ISO-8601 string with a Z suffix."""
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
 def parse_date_range(range_value: str | None, start_date: str | None, end_date: str | None) -> tuple[str, str]:
     if range_value and (start_date or end_date):
         raise ValidationError(

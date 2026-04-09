@@ -3,6 +3,30 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+# Exit codes agents can branch on without parsing JSON output.
+# 0 = success (Typer default)
+# 1 = generic/unexpected error
+# 2 = authentication failure (human intervention required)
+# 3 = quota / rate-limit (back off and retry)
+# 4 = insufficient OAuth scope (re-login with broader scopes)
+# 5 = resource not found (fix the ID and retry)
+# 6 = validation error (fix the query and retry immediately)
+EXIT_CODES: dict[str, int] = {
+    "AUTH_REQUIRED": 2,
+    "TOKEN_REFRESH_FAILED": 2,
+    "QUOTA_EXCEEDED": 3,
+    "RATE_LIMITED": 3,
+    "INSUFFICIENT_SCOPE": 4,
+    "RESOURCE_NOT_FOUND": 5,
+    "INVALID_METRIC": 6,
+    "INVALID_DIMENSION": 6,
+    "INVALID_METRIC_DIMENSION_COMBO": 6,
+    "INVALID_DATE_RANGE": 6,
+}
+
+# Error codes that are safe to retry after a back-off delay.
+RETRYABLE_CODES: frozenset[str] = frozenset({"QUOTA_EXCEEDED", "RATE_LIMITED"})
+
 
 @dataclass
 class YtxError(Exception):
@@ -12,6 +36,11 @@ class YtxError(Exception):
 
     def __str__(self) -> str:
         return self.message
+
+    @property
+    def exit_code(self) -> int:
+        """Return the recommended process exit code for this error."""
+        return EXIT_CODES.get(self.code, 1)
 
 
 class AuthError(YtxError):
@@ -53,7 +82,7 @@ def map_google_http_error(exc: Exception) -> ApiError:
             return ApiError(code="QUOTA_EXCEEDED", message=f"Quota exceeded: {reason}")
         if "forbidden" in lower or "insufficientPermissions" in reason:
             return ApiError(code="INSUFFICIENT_SCOPE", message=f"Insufficient permissions: {reason}")
-        return ApiError(code="QUOTA_EXCEEDED", message=f"Forbidden: {reason}")
+        return ApiError(code="API_ERROR", message=f"Forbidden: {reason}")
     if status == 404:
         return ApiError(code="RESOURCE_NOT_FOUND", message=f"Resource not found: {reason}")
     if status == 429:

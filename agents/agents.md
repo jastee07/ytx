@@ -46,6 +46,46 @@ Do not add write-side YouTube actions unless the user explicitly asks for them.
 - `src/ytx/cache/sqlite_cache.py`
   TTL-based SQLite cache. Supports `list_all()` and `clear(namespace=)` for inspection and invalidation.
 
+## Agent Affordances
+
+### Environment variables
+| Variable | Values | Purpose |
+|----------|--------|---------|
+| `YTX_OUTPUT` | `json`, `csv` | Force output format for all commands — agents should set `YTX_OUTPUT=json` so every response is machine-readable without passing `--json` per call |
+| `YTX_PROFILE` | `<profile_name>` | Default profile — avoids passing `--profile` on every call |
+
+### Exit codes
+Agents can branch on exit codes without parsing JSON:
+| Code | Meaning | Action |
+|------|---------|--------|
+| 0 | Success | — |
+| 1 | Generic / unexpected error | Inspect JSON error envelope |
+| 2 | `AUTH_REQUIRED` / `TOKEN_REFRESH_FAILED` | Requires human re-authentication |
+| 3 | `QUOTA_EXCEEDED` / `RATE_LIMITED` | Back off and retry (retryable) |
+| 4 | `INSUFFICIENT_SCOPE` | Re-login with broader scopes |
+| 5 | `RESOURCE_NOT_FOUND` | Fix the ID and retry |
+| 6 | Validation error | Fix query parameters and retry immediately |
+
+### Parameter discovery
+Call `ytx schema show --json` once at startup to obtain all valid metric aliases,
+dimension aliases, filter syntax, date range formats, exit code table, and env vars.
+The output is stable across patch releases.
+
+### Error envelope
+All errors emit a JSON envelope (when `--json` or `YTX_OUTPUT=json`):
+```json
+{
+  "ok": false,
+  "generated_at": "2024-01-15T10:30:00Z",
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "...",
+    "details": {}
+  }
+}
+```
+Branch on `error.code` (not `error.message`) for stable agent logic.
+
 ## Product Rules
 
 - Prefer `channels.list`, uploads-playlist traversal, and `videos.list`.
@@ -73,6 +113,7 @@ Do not add write-side YouTube actions unless the user explicitly asks for them.
 | `ytx doctor [scopes\|quota\|token]` | Diagnostics and quota guidance |
 | `ytx doctor cache show` | List all SQLite cache entries |
 | `ytx doctor cache clear [--namespace <ns>]` | Delete cache entries |
+| `ytx schema show` | Emit all valid metrics, dimensions, filters, exit codes, and env vars |
 
 ## Current Storage Layout
 

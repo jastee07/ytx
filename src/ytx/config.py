@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import tomllib
 
@@ -46,6 +47,8 @@ class AppContext:
     def resolve_profile_name(self, profile: str | None) -> str:
         if profile:
             return profile
+        if env_profile := os.environ.get("YTX_PROFILE"):
+            return env_profile
         return self.profile_store.default_profile() or self.settings.default_profile
 
 

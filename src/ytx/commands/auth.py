@@ -8,7 +8,7 @@ from ytx.auth.login import credentials_to_json, run_installed_app_flow
 from ytx.commands.common import console, render_key_value, render_payload, render_rows
 from ytx.commands.common import get_profile_metadata, load_data_client, render_error
 from ytx.config import AppContext, Settings, write_settings
-from ytx.errors import AuthError, YtxError
+from ytx.errors import AuthError, EXIT_CODES, YtxError
 from ytx.services.channel_service import normalize_channel
 
 app = typer.Typer(help="Authentication and profile management.")
@@ -56,7 +56,7 @@ def auth_login(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("whoami")
@@ -88,7 +88,7 @@ def auth_whoami(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 @app.command("list-profiles")
@@ -114,7 +114,7 @@ def auth_use(profile_name: str) -> None:
     ctx = AppContext()
     if ctx.profile_store.get_profile(profile_name) is None:
         console.print(f"[red]AUTH_REQUIRED[/red]: Profile '{profile_name}' is not configured.")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=EXIT_CODES.get("AUTH_REQUIRED", 1))
     ctx.profile_store.set_default_profile(profile_name)
     settings = ctx.settings
     settings.default_profile = profile_name
@@ -155,7 +155,7 @@ def auth_scopes(
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=error.exit_code)
 
 
 def init_command(

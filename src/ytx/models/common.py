@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from ytx.utils.dates import iso_now
 
 
 class Envelope(BaseModel):
@@ -12,7 +13,7 @@ class Envelope(BaseModel):
     ok: bool = True
     api: str
     profile: str
-    generated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z"))
+    generated_at: str = Field(default_factory=iso_now)
     data: dict[str, Any]
 
 
@@ -28,4 +29,5 @@ class ErrorEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     ok: Literal[False] = False
+    generated_at: str = Field(default_factory=iso_now)
     error: ErrorDetail

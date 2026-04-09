@@ -43,7 +43,7 @@ class TestAnalyticsQuery:
         result = runner.invoke(
             app, ["--entity", "video", "--range", "7d", "--metrics", "views", "--json"]
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 6
         data = json.loads(result.output)
         assert data["ok"] is False
         assert data["error"]["code"] == "INVALID_DIMENSION"
@@ -60,26 +60,26 @@ class TestAnalyticsQuery:
         assert result.exit_code == 0
         assert json.loads(result.output)["ok"] is True
 
-    def test_invalid_entity_exits_1(self, fake_analytics):
+    def test_invalid_entity_exits_6(self, fake_analytics):
         result = runner.invoke(
             app, ["--entity", "playlist", "--range", "7d", "--metrics", "views", "--json"]
         )
-        assert result.exit_code == 1
+        assert result.exit_code == 6
         data = json.loads(result.output)
         assert data["error"]["code"] == "INVALID_DIMENSION"
 
-    def test_missing_analytics_scope_exits_1(self, patch_ctx):
+    def test_missing_analytics_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[YT_READONLY])}
         )
         result = runner.invoke(app, [*_BASE, "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
-    def test_no_profile_exits_1(self, patch_ctx):
+    def test_no_profile_exits_2(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(profiles={})
         result = runner.invoke(app, [*_BASE, "--json"])
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         assert json.loads(result.output)["error"]["code"] == "AUTH_REQUIRED"
 
     def test_csv_output_exits_0(self, fake_analytics):
