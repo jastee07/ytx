@@ -6,7 +6,13 @@ import unittest.mock
 import pytest
 from typer.testing import CliRunner
 
-from conftest import FakeAnalyticsClient, FakeDataClient, FakeProfileStore, YT_READONLY, make_profile
+from conftest import (
+    FakeAnalyticsClient,
+    FakeDataClient,
+    FakeProfileStore,
+    YT_READONLY,
+    make_profile,
+)
 from ytx.commands.video import app
 
 runner = CliRunner()
@@ -21,14 +27,18 @@ def patch_ctx(app_ctx):
 @pytest.fixture
 def fake_data(patch_ctx):
     client = FakeDataClient()
-    with unittest.mock.patch("ytx.commands.video.load_data_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.video.load_data_client", return_value=client
+    ):
         yield client
 
 
 @pytest.fixture
 def fake_analytics(patch_ctx):
     client = FakeAnalyticsClient()
-    with unittest.mock.patch("ytx.commands.video.load_analytics_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.video.load_analytics_client", return_value=client
+    ):
         yield client
 
 
@@ -43,7 +53,9 @@ class TestVideoList:
     def test_published_after_filters_results(self, fake_data):
         # vid1 published 2026-03-01, vid2 published 2026-02-15
         # --published-after 2026-02-20 should return only vid1
-        result = runner.invoke(app, ["list", "--published-after", "2026-02-20", "--json"])
+        result = runner.invoke(
+            app, ["list", "--published-after", "2026-02-20", "--json"]
+        )
         assert result.exit_code == 0
         items = json.loads(result.output)["data"]["items"]
         assert len(items) == 1

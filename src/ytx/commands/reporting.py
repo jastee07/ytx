@@ -36,7 +36,9 @@ def reporting_list_report_types(
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_REPORTING)
         client = load_reporting_client(ctx, profile_name)
-        report_types = client.list_report_types(include_system_managed=include_system_managed)
+        report_types = client.list_report_types(
+            include_system_managed=include_system_managed
+        )
         render_payload(
             api="youtube_reporting",
             profile_name=profile_name,
@@ -143,8 +145,12 @@ def reporting_delete_job(
 @app.command("list-reports")
 def reporting_list_reports(
     job_id: str = typer.Option(..., "--job-id"),
-    created_after: str | None = typer.Option(None, "--created-after", help="RFC 3339 timestamp"),
-    start_time_at_or_after: str | None = typer.Option(None, "--start-time-at-or-after", help="RFC 3339 timestamp"),
+    created_after: str | None = typer.Option(
+        None, "--created-after", help="RFC 3339 timestamp"
+    ),
+    start_time_at_or_after: str | None = typer.Option(
+        None, "--start-time-at-or-after", help="RFC 3339 timestamp"
+    ),
     profile: str | None = typer.Option(None, "--profile"),
     as_json: bool = typer.Option(False, "--json"),
     as_csv: bool = typer.Option(False, "--csv"),
@@ -200,6 +206,7 @@ def reporting_download(
         target = next((r for r in reports if r.get("id") == report_id), None)
         if target is None:
             from ytx.errors import ApiError
+
             raise ApiError(
                 code="RESOURCE_NOT_FOUND",
                 message=f"Report '{report_id}' not found under job '{job_id}'.",
@@ -210,6 +217,7 @@ def reporting_download(
         if output:
             output.write_bytes(raw_bytes)
             from ytx.commands.common import console
+
             console.print(f"Written to {output}")
             return
 
@@ -223,7 +231,9 @@ def reporting_download(
             as_json=as_json,
             as_csv=False,
             output=None,
-            human_renderer=lambda c, d: render_rows(c, "Report Data", {"items": d["items"]}),
+            human_renderer=lambda c, d: render_rows(
+                c, "Report Data", {"items": d["items"]}
+            ),
         )
     except YtxError as error:
         render_error(error, as_json=as_json, output=output)

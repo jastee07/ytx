@@ -24,7 +24,15 @@ from ytx.utils.dates import parse_date_range
 
 app = typer.Typer(help="Authenticated channel operations.")
 
-DEFAULT_CHANNEL_METRICS = ["views", "watch_time", "avg_view_duration", "likes", "comments", "subs_gained", "subs_lost"]
+DEFAULT_CHANNEL_METRICS = [
+    "views",
+    "watch_time",
+    "avg_view_duration",
+    "likes",
+    "comments",
+    "subs_gained",
+    "subs_lost",
+]
 
 
 @app.command("get")
@@ -69,11 +77,16 @@ def channel_videos(
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_VIDEO)
         service = ChannelService(load_data_client(ctx, profile_name), ctx.cache)
-        videos, next_page_token = service.list_recent_videos(profile_name, limit=limit, page_token=page_token)
+        videos, next_page_token = service.list_recent_videos(
+            profile_name, limit=limit, page_token=page_token
+        )
         render_payload(
             api="youtube_data",
             profile_name=profile_name,
-            data={"items": [video.model_dump() for video in videos], "next_page_token": next_page_token},
+            data={
+                "items": [video.model_dump() for video in videos],
+                "next_page_token": next_page_token,
+            },
             as_json=as_json,
             as_csv=as_csv,
             output=output,
@@ -99,7 +112,9 @@ def channel_stats(
     try:
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_ANALYTICS)
-        resolved_start, resolved_end = parse_date_range(range_value, start_date, end_date)
+        resolved_start, resolved_end = parse_date_range(
+            range_value, start_date, end_date
+        )
         service = AnalyticsService(load_analytics_client(ctx, profile_name), ctx.cache)
         report = service.query(
             AnalyticsQuery(

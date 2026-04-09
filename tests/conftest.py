@@ -12,9 +12,6 @@ if str(SRC) not in sys.path:
 # Shared constants
 # ---------------------------------------------------------------------------
 
-import json
-import re
-import unittest.mock
 
 import pytest
 
@@ -99,7 +96,9 @@ def make_profile(name="default", channel_id="UC123", title="Test Channel", scope
 
 class FakeProfileStore:
     def __init__(self, profiles=None, default="default"):
-        self._profiles = profiles if profiles is not None else {"default": make_profile()}
+        self._profiles = (
+            profiles if profiles is not None else {"default": make_profile()}
+        )
         self._default = default
 
     def get_profile(self, name):
@@ -149,7 +148,12 @@ class FakeCache:
 
     def list_all(self):
         return [
-            {"namespace": ns, "cache_key": f"{ns}:{key}", "expires_at": "2099-01-01T00:00:00+00:00", "created_at": "2026-01-01T00:00:00+00:00"}
+            {
+                "namespace": ns,
+                "cache_key": f"{ns}:{key}",
+                "expires_at": "2099-01-01T00:00:00+00:00",
+                "created_at": "2026-01-01T00:00:00+00:00",
+            }
             for (ns, key) in self.store
         ]
 
@@ -195,7 +199,12 @@ FAKE_REPORT_TYPES = [
 ]
 
 FAKE_JOBS = [
-    {"id": "job1", "reportTypeId": "rtype1", "name": "My daily report", "createTime": "2026-01-01T00:00:00Z"},
+    {
+        "id": "job1",
+        "reportTypeId": "rtype1",
+        "name": "My daily report",
+        "createTime": "2026-01-01T00:00:00Z",
+    },
 ]
 
 FAKE_REPORTS = [
@@ -220,7 +229,12 @@ class FakeReportingClient:
         return FAKE_JOBS
 
     def create_job(self, *, report_type_id, name):
-        return {"id": "job2", "reportTypeId": report_type_id, "name": name, "createTime": "2026-04-01T00:00:00Z"}
+        return {
+            "id": "job2",
+            "reportTypeId": report_type_id,
+            "name": name,
+            "createTime": "2026-04-01T00:00:00Z",
+        }
 
     def list_reports(self, job_id, *, created_after=None, start_time_at_or_after=None):
         return [r for r in FAKE_REPORTS if r["jobId"] == job_id]

@@ -1,6 +1,7 @@
 """Error-path tests: verify that API errors and auth failures surface
 the correct error codes and exit codes rather than raw exceptions.
 Also covers map_google_http_error() mapping logic."""
+
 from __future__ import annotations
 
 import json
@@ -28,6 +29,7 @@ def _fake_http_error(status: int, reason: str = "test error") -> MagicMock:
 class TestMapGoogleHttpError:
     def _map(self, status, reason="test error"):
         from ytx.errors import map_google_http_error
+
         return map_google_http_error(_fake_http_error(status, reason))
 
     def test_401_returns_auth_required(self):
@@ -68,8 +70,10 @@ class TestMapGoogleHttpError:
 
     def test_non_http_error_returns_api_error(self):
         from ytx.errors import map_google_http_error
+
         err = map_google_http_error(ValueError("not an http error"))
         assert err.code == "API_ERROR"
+
 
 from ytx.errors import ApiError, AuthError
 
@@ -112,27 +116,41 @@ class TestChannelGetApiErrors:
     def _invoke(self, app_ctx, error):
         from ytx.commands.channel import app
 
-        with unittest.mock.patch("ytx.commands.channel.AppContext", return_value=app_ctx):
-            with unittest.mock.patch("ytx.commands.channel.load_data_client", return_value=ErrorDataClient(error)):
+        with unittest.mock.patch(
+            "ytx.commands.channel.AppContext", return_value=app_ctx
+        ):
+            with unittest.mock.patch(
+                "ytx.commands.channel.load_data_client",
+                return_value=ErrorDataClient(error),
+            ):
                 return runner.invoke(app, ["get", "--json"])
 
     def test_quota_exceeded(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="QUOTA_EXCEEDED", message="Daily quota limit reached."))
+        result = self._invoke(
+            app_ctx,
+            ApiError(code="QUOTA_EXCEEDED", message="Daily quota limit reached."),
+        )
         assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "QUOTA_EXCEEDED"
 
     def test_resource_not_found(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="RESOURCE_NOT_FOUND", message="Channel not found."))
+        result = self._invoke(
+            app_ctx, ApiError(code="RESOURCE_NOT_FOUND", message="Channel not found.")
+        )
         assert result.exit_code == 5
         assert json.loads(result.output)["error"]["code"] == "RESOURCE_NOT_FOUND"
 
     def test_insufficient_scope_from_api(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="INSUFFICIENT_SCOPE", message="Missing OAuth scope."))
+        result = self._invoke(
+            app_ctx, ApiError(code="INSUFFICIENT_SCOPE", message="Missing OAuth scope.")
+        )
         assert result.exit_code == 4
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
     def test_rate_limited(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests."))
+        result = self._invoke(
+            app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests.")
+        )
         assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "RATE_LIMITED"
 
@@ -147,16 +165,24 @@ class TestVideoGetApiErrors:
         from ytx.commands.video import app
 
         with unittest.mock.patch("ytx.commands.video.AppContext", return_value=app_ctx):
-            with unittest.mock.patch("ytx.commands.video.load_data_client", return_value=ErrorDataClient(error)):
+            with unittest.mock.patch(
+                "ytx.commands.video.load_data_client",
+                return_value=ErrorDataClient(error),
+            ):
                 return runner.invoke(app, ["get", "vid999", "--json"])
 
     def test_resource_not_found(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="RESOURCE_NOT_FOUND", message="Video not found: vid999"))
+        result = self._invoke(
+            app_ctx,
+            ApiError(code="RESOURCE_NOT_FOUND", message="Video not found: vid999"),
+        )
         assert result.exit_code == 5
         assert json.loads(result.output)["error"]["code"] == "RESOURCE_NOT_FOUND"
 
     def test_rate_limited(self, app_ctx):
-        result = self._invoke(app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests."))
+        result = self._invoke(
+            app_ctx, ApiError(code="RATE_LIMITED", message="Too many requests.")
+        )
         assert result.exit_code == 3
         assert json.loads(result.output)["error"]["code"] == "RATE_LIMITED"
 
@@ -170,9 +196,16 @@ class TestTokenRefreshFailure:
     def test_refresh_failure_exits_2(self, app_ctx):
         from ytx.commands.channel import app
 
-        err = AuthError(code="TOKEN_REFRESH_FAILED", message="Token was revoked. Run 'ytx auth login'.")
-        with unittest.mock.patch("ytx.commands.channel.AppContext", return_value=app_ctx):
-            with unittest.mock.patch("ytx.commands.channel.load_data_client", side_effect=err):
+        err = AuthError(
+            code="TOKEN_REFRESH_FAILED",
+            message="Token was revoked. Run 'ytx auth login'.",
+        )
+        with unittest.mock.patch(
+            "ytx.commands.channel.AppContext", return_value=app_ctx
+        ):
+            with unittest.mock.patch(
+                "ytx.commands.channel.load_data_client", side_effect=err
+            ):
                 result = runner.invoke(app, ["get", "--json"])
         assert result.exit_code == 2
         assert json.loads(result.output)["error"]["code"] == "TOKEN_REFRESH_FAILED"
@@ -188,7 +221,9 @@ class TestDoctorCache:
     def patch_ctx(self, app_ctx):
         from ytx.commands.doctor import app as doctor_app
 
-        with unittest.mock.patch("ytx.commands.doctor.AppContext", return_value=app_ctx):
+        with unittest.mock.patch(
+            "ytx.commands.doctor.AppContext", return_value=app_ctx
+        ):
             yield app_ctx, doctor_app
 
     def test_cache_show_empty(self, patch_ctx):
@@ -223,7 +258,9 @@ class TestDoctorCache:
         app_ctx, doctor_app = patch_ctx
         app_ctx.cache.set("channel", "UC123", {}, ttl_seconds=900)
         app_ctx.cache.set("video", "vid1", {}, ttl_seconds=900)
-        result = runner.invoke(doctor_app, ["cache", "clear", "--namespace", "channel", "--json"])
+        result = runner.invoke(
+            doctor_app, ["cache", "clear", "--namespace", "channel", "--json"]
+        )
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["data"]["deleted"] == 1

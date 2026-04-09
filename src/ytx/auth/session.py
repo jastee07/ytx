@@ -11,7 +11,9 @@ def load_credentials(secret_store: KeyringBackedStore, profile_name: str):
     try:
         from google.oauth2.credentials import Credentials
     except ImportError as exc:
-        raise AuthError(code="AUTH_REQUIRED", message="google-auth is required to load credentials.") from exc
+        raise AuthError(
+            code="AUTH_REQUIRED", message="google-auth is required to load credentials."
+        ) from exc
 
     payload = secret_store.load_json(profile_name)
     if payload is None:
@@ -38,12 +40,18 @@ def refresh_credentials(credentials: Any) -> None:
     if credentials.valid:
         return
     if not credentials.refresh_token:
-        raise AuthError(code="TOKEN_REFRESH_FAILED", message="Credentials do not contain a refresh token.")
+        raise AuthError(
+            code="TOKEN_REFRESH_FAILED",
+            message="Credentials do not contain a refresh token.",
+        )
     try:
         import google.auth.exceptions
         from google.auth.transport.requests import Request
     except ImportError as exc:
-        raise AuthError(code="TOKEN_REFRESH_FAILED", message="google-auth transport support is required.") from exc
+        raise AuthError(
+            code="TOKEN_REFRESH_FAILED",
+            message="google-auth transport support is required.",
+        ) from exc
     try:
         credentials.refresh(Request())
     except google.auth.exceptions.RefreshError as exc:
@@ -58,7 +66,9 @@ def refresh_credentials(credentials: Any) -> None:
         ) from exc
 
 
-def persist_credentials(secret_store: KeyringBackedStore, profile_name: str, credentials: Any) -> None:
+def persist_credentials(
+    secret_store: KeyringBackedStore, profile_name: str, credentials: Any
+) -> None:
     expiry = getattr(credentials, "expiry", None)
     secret_store.save_json(
         profile_name,
@@ -68,7 +78,11 @@ def persist_credentials(secret_store: KeyringBackedStore, profile_name: str, cre
             "token_uri": getattr(credentials, "token_uri", None),
             "client_id": getattr(credentials, "client_id", None),
             "client_secret": getattr(credentials, "client_secret", None),
-            "scopes": list(getattr(credentials, "granted_scopes", None) or getattr(credentials, "scopes", None) or []),
+            "scopes": list(
+                getattr(credentials, "granted_scopes", None)
+                or getattr(credentials, "scopes", None)
+                or []
+            ),
             "expiry": expiry.isoformat() if expiry else None,
         },
     )

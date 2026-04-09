@@ -8,7 +8,9 @@ from typing import Any
 from rich.console import Console
 
 
-def emit_csv(console: Console, rows: list[dict[str, Any]], output: Path | None = None) -> None:
+def emit_csv(
+    console: Console, rows: list[dict[str, Any]], output: Path | None = None
+) -> None:
     if not rows:
         rendered = ""
     else:

@@ -21,7 +21,9 @@ def patch_ctx(app_ctx):
 @pytest.fixture
 def fake_analytics(patch_ctx):
     client = FakeAnalyticsClient()
-    with unittest.mock.patch("ytx.commands.analytics.load_analytics_client", return_value=client):
+    with unittest.mock.patch(
+        "ytx.commands.analytics.load_analytics_client", return_value=client
+    ):
         yield client
 
 
@@ -53,8 +55,15 @@ class TestAnalyticsQuery:
         result = runner.invoke(
             app,
             [
-                "--entity", "video", "--video-id", "vid1",
-                "--range", "7d", "--metrics", "views", "--json",
+                "--entity",
+                "video",
+                "--video-id",
+                "vid1",
+                "--range",
+                "7d",
+                "--metrics",
+                "views",
+                "--json",
             ],
         )
         assert result.exit_code == 0
@@ -62,7 +71,8 @@ class TestAnalyticsQuery:
 
     def test_invalid_entity_exits_6(self, fake_analytics):
         result = runner.invoke(
-            app, ["--entity", "playlist", "--range", "7d", "--metrics", "views", "--json"]
+            app,
+            ["--entity", "playlist", "--range", "7d", "--metrics", "views", "--json"],
         )
         assert result.exit_code == 6
         data = json.loads(result.output)

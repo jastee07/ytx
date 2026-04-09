@@ -26,7 +26,9 @@ def build_envelope(api: str, profile_name: str, data: dict[str, Any]) -> Envelop
 
 
 def build_error(error: YtxError) -> ErrorEnvelope:
-    return ErrorEnvelope(error=ErrorDetail(code=error.code, message=error.message, details=error.details))
+    return ErrorEnvelope(
+        error=ErrorDetail(code=error.code, message=error.message, details=error.details)
+    )
 
 
 def render_payload(
@@ -45,7 +47,9 @@ def render_payload(
     elif ytx_output == "csv":
         as_csv = True
     if as_json and as_csv:
-        raise ValidationError(code="API_ERROR", message="Use only one of --json or --csv.")
+        raise ValidationError(
+            code="API_ERROR", message="Use only one of --json or --csv."
+        )
     envelope = build_envelope(api=api, profile_name=profile_name, data=data)
     if as_json:
         emit_json(console, envelope, output=output)
@@ -57,7 +61,9 @@ def render_payload(
     human_renderer(console, data)
 
 
-def render_error(error: YtxError, as_json: bool = False, output: Path | None = None) -> None:
+def render_error(
+    error: YtxError, as_json: bool = False, output: Path | None = None
+) -> None:
     if as_json:
         emit_json(console, build_error(error), output=output)
         return
@@ -96,7 +102,9 @@ def render_rows(console: Console, title: str, data: dict[str, Any]) -> None:
 def get_profile_metadata(ctx: AppContext, profile_name: str) -> dict[str, Any]:
     profile = ctx.profile_store.get_profile(profile_name)
     if profile is None:
-        raise YtxError(code="AUTH_REQUIRED", message=f"Profile '{profile_name}' is not configured.")
+        raise YtxError(
+            code="AUTH_REQUIRED", message=f"Profile '{profile_name}' is not configured."
+        )
     return profile
 
 

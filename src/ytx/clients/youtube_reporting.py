@@ -30,13 +30,17 @@ class YouTubeReportingClient:
                 message="google-api-python-client is required for YouTube Reporting access.",
             ) from exc
         http = AuthorizedHttp(credentials, http=httplib2.Http(timeout=30))
-        self._service = build("youtubereporting", "v1", http=http, cache_discovery=False)
+        self._service = build(
+            "youtubereporting", "v1", http=http, cache_discovery=False
+        )
 
     # ------------------------------------------------------------------
     # Report types
     # ------------------------------------------------------------------
 
-    def list_report_types(self, *, include_system_managed: bool = False) -> list[dict[str, Any]]:
+    def list_report_types(
+        self, *, include_system_managed: bool = False
+    ) -> list[dict[str, Any]]:
         """Return all report types available to the authenticated channel."""
         try:
             response = (
@@ -52,7 +56,9 @@ class YouTubeReportingClient:
     # Jobs
     # ------------------------------------------------------------------
 
-    def list_jobs(self, *, include_system_managed: bool = False) -> list[dict[str, Any]]:
+    def list_jobs(
+        self, *, include_system_managed: bool = False
+    ) -> list[dict[str, Any]]:
         """List all reporting jobs for the authenticated channel."""
         try:
             response = (
@@ -103,7 +109,9 @@ class YouTubeReportingClient:
         if start_time_at_or_after:
             params["startTimeAtOrAfter"] = start_time_at_or_after
         try:
-            response = self._service.jobs().reports().list(**params).execute(num_retries=3)
+            response = (
+                self._service.jobs().reports().list(**params).execute(num_retries=3)
+            )
         except Exception as exc:
             raise map_google_http_error(exc) from exc
         return response.get("reports", [])

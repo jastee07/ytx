@@ -55,6 +55,7 @@ class AppContext:
 def build_paths() -> AppPaths:
     try:
         from platformdirs import user_config_dir
+
         root = Path(user_config_dir("ytx", appauthor=False))
     except ImportError:
         root = Path.home() / ".config" / "ytx"
@@ -82,7 +83,9 @@ def load_settings(paths: AppPaths) -> Settings:
 
 
 def write_settings(paths: AppPaths, settings: Settings) -> None:
-    client_secret_path = (settings.client_secret_path or "").replace("\\", "/").replace('"', '\\"')
+    client_secret_path = (
+        (settings.client_secret_path or "").replace("\\", "/").replace('"', '\\"')
+    )
     contents = "\n".join(
         [
             "[app]",

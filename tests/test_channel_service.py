@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import pytest
 
 from ytx.errors import ApiError
 from ytx.models.channel import ChannelProfile
@@ -98,6 +97,7 @@ class DictCache:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_get_channel_returns_profile() -> None:
     service = ChannelService(FakeDataClient(), DictCache())

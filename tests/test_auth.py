@@ -6,7 +6,7 @@ import unittest.mock
 import pytest
 from typer.testing import CliRunner
 
-from conftest import ALL_SCOPES, FakeProfileStore, YT_READONLY, make_profile
+from conftest import FakeProfileStore, YT_READONLY, make_profile
 from ytx.commands.auth import app
 
 runner = CliRunner()

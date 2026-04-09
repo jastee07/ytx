@@ -148,3 +148,55 @@ The repo tests deterministic local logic only. Live OAuth and Google API calls r
 - Reuse the cache namespaces already present before creating new storage patterns.
 - Keep docs aligned with the implemented command surface.
 - All API client calls must pass `num_retries=3` to `.execute()` to be consistent with the rest of the codebase.
+
+## Target Users
+
+- **Primary:** AI agents (Claude, GPT, custom) automating YouTube analytics workflows. These users consume `YTX_OUTPUT=json`, branch on exit codes, and call `ytx schema show` for parameter discovery.
+- **Secondary:** Human YouTube creators who prefer CLI over the Studio dashboard for quick analytics checks.
+- **Tertiary:** Developer teams building YouTube analytics dashboards or data pipelines that shell out to `ytx`.
+
+## Versioning Strategy
+
+The project follows semantic versioning (semver): `MAJOR.MINOR.PATCH`.
+
+| Bump | Trigger |
+|------|---------|
+| MAJOR | Breaking changes to the JSON envelope schema, exit code table, or error code strings |
+| MINOR | New commands, new metrics/dimensions, or new optional envelope fields |
+| PATCH | Bug fixes, performance improvements, dependency updates |
+
+**Stability contract:** the top-level JSON envelope shape (`ok`, `api`, `profile`, `generated_at`, `data`), the exit code table, and the error code strings are the public API surface. These must not change within a major version.
+
+## Distribution
+
+- Source: `github.com/jastee07/ytx`
+- Install: `pip install git+https://github.com/jastee07/ytx.git`
+- Releases are tagged as `v{MAJOR}.{MINOR}.{PATCH}` on GitHub with changelogs.
+
+## Non-Functional Requirements
+
+| Aspect | Guarantee |
+|--------|-----------|
+| API timeout | 30 seconds per request (`httplib2.Http(timeout=30)`) |
+| Automatic retries | 3 retries with exponential backoff (`num_retries=3` on every `.execute()`) |
+| Cache TTL — channel profile | 24 hours |
+| Cache TTL — video lists | 15 minutes |
+| Cache TTL — analytics queries | 15 minutes |
+| Background processes | None; CLI exits after each invocation |
+| Quota strategy | Prefer `channels.list` + `videos.list` (1 unit each) over `search.list` (100 units) |
+
+## Data Privacy & Security
+
+- **Credential storage:** OS keyring (preferred) or AES-encrypted local files via Fernet (fallback when keyring is unavailable).
+- **No plaintext credentials:** Credentials are never logged, printed, or transmitted beyond Google OAuth endpoints.
+- **Read-only by default:** Only read-only OAuth scopes are requested (`youtube.readonly`, `yt-analytics.readonly`). No write operations against the YouTube API.
+- **No telemetry:** No analytics, usage tracking, or phone-home behavior.
+- **Local cache:** SQLite database stored in the user's config directory. Users can inspect via `ytx doctor cache show` and clear via `ytx doctor cache clear`.
+
+## Compatibility Matrix
+
+| Dimension | Supported |
+|-----------|-----------|
+| Python | 3.12, 3.13 |
+| OS | Linux, macOS, Windows (via `platformdirs` for config/cache paths) |
+| Terminal | Any terminal with Unicode support; Rich handles formatting gracefully |

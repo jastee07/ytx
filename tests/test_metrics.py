@@ -3,7 +3,12 @@ from __future__ import annotations
 import pytest
 
 from ytx.errors import ValidationError
-from ytx.utils.metrics import resolve_dimensions, resolve_filters, resolve_metrics, validate_metric_dimension_combo
+from ytx.utils.metrics import (
+    resolve_dimensions,
+    resolve_filters,
+    resolve_metrics,
+    validate_metric_dimension_combo,
+)
 
 
 def test_resolve_metrics_maps_aliases() -> None:
@@ -25,7 +30,10 @@ def test_resolve_dimensions_rejects_unknown_dimension() -> None:
 
 
 def test_resolve_filters_appends_video_filter() -> None:
-    assert resolve_filters(["country==US"], video_id="abc123") == ["country==US", "video==abc123"]
+    assert resolve_filters(["country==US"], video_id="abc123") == [
+        "country==US",
+        "video==abc123",
+    ]
 
 
 def test_validate_metric_dimension_combo_only_supports_day() -> None:

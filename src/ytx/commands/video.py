@@ -44,7 +44,9 @@ def video_list(
         videos, next_page_token = service.list_recent_videos(profile_name, limit=limit)
         items = [video.model_dump() for video in videos]
         if published_after:
-            items = [item for item in items if item["published_at"][:10] > published_after]
+            items = [
+                item for item in items if item["published_at"][:10] > published_after
+            ]
         render_payload(
             api="youtube_data",
             profile_name=profile_name,
@@ -108,9 +110,12 @@ def video_analytics(
     try:
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_ANALYTICS)
-        resolved_start, resolved_end = parse_date_range(range_value, start_date, end_date)
+        resolved_start, resolved_end = parse_date_range(
+            range_value, start_date, end_date
+        )
         dimension_list = [dimensions] if dimensions else []
         from ytx.utils.metrics import split_csv
+
         metric_list = split_csv(metrics)
         service = AnalyticsService(load_analytics_client(ctx, profile_name), ctx.cache)
         report = service.query(

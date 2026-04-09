@@ -17,7 +17,9 @@ def iso_now() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
-def parse_date_range(range_value: str | None, start_date: str | None, end_date: str | None) -> tuple[str, str]:
+def parse_date_range(
+    range_value: str | None, start_date: str | None, end_date: str | None
+) -> tuple[str, str]:
     if range_value and (start_date or end_date):
         raise ValidationError(
             code="INVALID_DATE_RANGE",

@@ -12,9 +12,14 @@ class YouTubeAnalyticsClient:
             from google_auth_httplib2 import AuthorizedHttp
             from googleapiclient.discovery import build
         except ImportError as exc:
-            raise ApiError(code="API_ERROR", message="google-api-python-client is required for YouTube Analytics access.") from exc
+            raise ApiError(
+                code="API_ERROR",
+                message="google-api-python-client is required for YouTube Analytics access.",
+            ) from exc
         http = AuthorizedHttp(credentials, http=httplib2.Http(timeout=30))
-        self._service = build("youtubeAnalytics", "v2", http=http, cache_discovery=False)
+        self._service = build(
+            "youtubeAnalytics", "v2", http=http, cache_discovery=False
+        )
 
     def query(
         self,

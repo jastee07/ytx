@@ -55,7 +55,13 @@ class SQLiteCache:
                   expires_at=excluded.expires_at,
                   created_at=excluded.created_at
                 """,
-                (cache_key, namespace, json.dumps(payload), expires_at.isoformat(), now.isoformat()),
+                (
+                    cache_key,
+                    namespace,
+                    json.dumps(payload),
+                    expires_at.isoformat(),
+                    now.isoformat(),
+                ),
             )
 
     def get(self, namespace: str, key: str) -> Any | None:
@@ -85,7 +91,12 @@ class SQLiteCache:
                 "SELECT namespace, cache_key, expires_at, created_at FROM cache_entries ORDER BY namespace, cache_key"
             ).fetchall()
         return [
-            {"namespace": r[0], "cache_key": r[1], "expires_at": r[2], "created_at": r[3]}
+            {
+                "namespace": r[0],
+                "cache_key": r[1],
+                "expires_at": r[2],
+                "created_at": r[3],
+            }
             for r in rows
         ]
 
@@ -93,7 +104,9 @@ class SQLiteCache:
         """Delete cache entries, optionally filtered to a namespace. Returns count deleted."""
         with self._connect() as conn:
             if namespace:
-                cursor = conn.execute("DELETE FROM cache_entries WHERE namespace = ?", (namespace,))
+                cursor = conn.execute(
+                    "DELETE FROM cache_entries WHERE namespace = ?", (namespace,)
+                )
             else:
                 cursor = conn.execute("DELETE FROM cache_entries")
             return cursor.rowcount
