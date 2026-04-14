@@ -22,4 +22,4 @@ def emit_json(
     if output:
         output.write_text(rendered + "\n", encoding="utf-8")
         return
-    console.print(rendered)
+    console.out(rendered)

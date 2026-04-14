@@ -22,4 +22,4 @@ def emit_csv(
     if output:
         output.write_text(rendered, encoding="utf-8")
         return
-    console.print(rendered.rstrip())
+    console.out(rendered.rstrip())
