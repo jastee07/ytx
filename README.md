@@ -6,7 +6,7 @@
 
 ### Features
 
-- **Read-only by default** — no write operations against the YouTube API
+- **Read-only** — no write operations against the YouTube API
 - **Agent-friendly** — stable JSON envelope, deterministic exit codes, environment variable controls
 - **Multi-profile** — manage multiple channel profiles locally
 - **Cached** — SQLite TTL-based cache reduces redundant API calls
@@ -75,7 +75,7 @@ export YTX_OUTPUT=json
 export YTX_PROFILE=default
 ```
 
-Call `ytx schema show --json` once at startup to discover all valid metrics, dimensions, filters, exit codes, and environment variables.
+Call `ytx schema show --json` once at startup to discover all valid metrics, dimensions, filters, command parameter contracts, exit codes, and environment variables.
 
 **Exit codes** allow branching without parsing JSON:
 
@@ -101,15 +101,14 @@ Call `ytx schema show --json` once at startup to discover all valid metrics, dim
 | `ytx auth logout` | Remove profile and credentials |
 | `ytx auth scopes` | Show granted OAuth scopes |
 | `ytx channel get` | Channel metadata |
-| `ytx channel videos` | Recent video inventory |
+| `ytx channel videos` | Recent video inventory (`--all`, `--max-pages`) |
 | `ytx channel stats` | Channel-level analytics |
-| `ytx video list` | List videos with optional filters |
+| `ytx video list` | List videos with optional filters (`--all`, `--max-pages`) |
 | `ytx video get <id>` | Single video metadata |
 | `ytx video analytics <id>` | Per-video analytics |
 | `ytx analytics query` | Generic Analytics API query |
 | `ytx reporting list-report-types` | Available bulk report types |
 | `ytx reporting list-jobs` | Active reporting jobs |
-| `ytx reporting create-job` | Create a new reporting job |
 | `ytx reporting list-reports` | Completed reports for a job |
 | `ytx reporting download` | Download a bulk CSV report |
 | `ytx doctor` | Run diagnostic checks |

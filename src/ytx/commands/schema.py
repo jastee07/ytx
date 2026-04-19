@@ -69,6 +69,7 @@ def schema_show(
                 "description": "Default profile to use when --profile is not supplied.",
             },
         },
+        "commands": COMMAND_CONTRACTS,
     }
     render_payload(
         api="schema",
@@ -101,6 +102,9 @@ def _human_schema(c: Console, data: dict[str, Any]) -> None:
     c.print("\n[bold]Env vars[/bold]")
     for var, info in data["env_vars"].items():
         c.print(f"  {var}: {info['description']}")
+    c.print("\n[bold]Commands[/bold]")
+    for name, info in data["commands"].items():
+        c.print(f"  {name}: {info['description']}")
 
 
 _METRIC_DESCRIPTIONS: dict[str, str] = {
@@ -120,4 +124,143 @@ _DIMENSION_DESCRIPTIONS: dict[str, str] = {
 _FILTER_DESCRIPTIONS: dict[str, str] = {
     "country": "ISO 3166-1 alpha-2 country code (e.g. country==US)",
     "video": "YouTube video ID (e.g. video==dQw4w9WgXcQ)",
+}
+
+COMMAND_CONTRACTS: dict[str, dict[str, Any]] = {
+    "channel.get": {
+        "description": "Return authenticated channel metadata.",
+        "options": {
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "channel.videos": {
+        "description": "List uploaded videos for the channel.",
+        "options": {
+            "--limit": {"required": False, "type": "integer", "default": 25},
+            "--page-token": {"required": False, "type": "string"},
+            "--all": {"required": False, "type": "boolean", "default": False},
+            "--max-pages": {"required": False, "type": "integer"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "channel.stats": {
+        "description": "Return channel-level analytics totals for a date range.",
+        "options": {
+            "--range": {"required": False, "type": "string", "example": "28d"},
+            "--start-date": {"required": False, "type": "date"},
+            "--end-date": {"required": False, "type": "date"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "video.list": {
+        "description": "List video inventory with optional date filtering.",
+        "options": {
+            "--limit": {"required": False, "type": "integer", "default": 25},
+            "--page-token": {"required": False, "type": "string"},
+            "--all": {"required": False, "type": "boolean", "default": False},
+            "--max-pages": {"required": False, "type": "integer"},
+            "--published-after": {"required": False, "type": "date"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "video.get": {
+        "description": "Get a single video by video ID.",
+        "options": {
+            "<video_id>": {"required": True, "type": "string"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "video.analytics": {
+        "description": "Get analytics for one video over a date range.",
+        "options": {
+            "<video_id>": {"required": True, "type": "string"},
+            "--range": {"required": False, "type": "string", "example": "7d"},
+            "--start-date": {"required": False, "type": "date"},
+            "--end-date": {"required": False, "type": "date"},
+            "--metrics": {
+                "required": False,
+                "type": "csv",
+                "default": "views,watch_time",
+            },
+            "--dimensions": {"required": False, "type": "csv"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "analytics.query": {
+        "description": "Generic Analytics API query.",
+        "options": {
+            "--entity": {"required": True, "type": "enum", "values": ["channel", "video"]},
+            "--video-id": {"required": False, "type": "string"},
+            "--range": {"required": False, "type": "string"},
+            "--start-date": {"required": False, "type": "date"},
+            "--end-date": {"required": False, "type": "date"},
+            "--metrics": {"required": True, "type": "csv"},
+            "--dimensions": {"required": False, "type": "csv"},
+            "--filters": {"required": False, "type": "csv"},
+            "--sort": {"required": False, "type": "csv"},
+            "--max-results": {"required": False, "type": "integer"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "reporting.list-report-types": {
+        "description": "List reporting report types available to this channel.",
+        "options": {
+            "--include-system-managed": {"required": False, "type": "boolean"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "reporting.list-jobs": {
+        "description": "List existing reporting jobs.",
+        "options": {
+            "--include-system-managed": {"required": False, "type": "boolean"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "reporting.list-reports": {
+        "description": "List completed reports under a reporting job.",
+        "options": {
+            "--job-id": {"required": True, "type": "string"},
+            "--created-after": {"required": False, "type": "datetime"},
+            "--start-time-at-or-after": {"required": False, "type": "datetime"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--csv": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
+    "reporting.download": {
+        "description": "Download and parse one reporting CSV file.",
+        "options": {
+            "--job-id": {"required": True, "type": "string"},
+            "--report-id": {"required": True, "type": "string"},
+            "--profile": {"required": False, "type": "string"},
+            "--json": {"required": False, "type": "boolean"},
+            "--output": {"required": False, "type": "path"},
+        },
+    },
 }

@@ -85,6 +85,12 @@ class TestChannelVideos:
         result = runner.invoke(app, ["videos", "--csv"])
         assert result.exit_code == 0
 
+    def test_all_flag_exits_0(self, fake_data):
+        result = runner.invoke(app, ["videos", "--all", "--max-pages", "2", "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert isinstance(data["data"]["items"], list)
+
     def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}

@@ -95,6 +95,36 @@ class ChannelService:
         )
         return ordered[:limit], next_page_token
 
+    def list_recent_videos_all(
+        self,
+        profile_name: str,
+        limit: int,
+        page_token: str | None = None,
+        max_pages: int | None = None,
+    ) -> tuple[list[VideoSummary], str | None]:
+        """Collect videos across pages until limit/max_pages is reached."""
+        if limit <= 0:
+            return [], page_token
+        remaining = limit
+        current_token = page_token
+        pages_read = 0
+        items: list[VideoSummary] = []
+        while remaining > 0:
+            if max_pages is not None and pages_read >= max_pages:
+                break
+            page_items, next_token = self.list_recent_videos(
+                profile_name=profile_name,
+                limit=remaining,
+                page_token=current_token,
+            )
+            items.extend(page_items)
+            pages_read += 1
+            remaining = limit - len(items)
+            if not next_token:
+                return items[:limit], None
+            current_token = next_token
+        return items[:limit], current_token
+
 
 def _to_int(value: Any) -> int | None:
     if value is None:
