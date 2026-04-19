@@ -50,8 +50,14 @@ def parse_date_range(
         )
 
     if start_date and end_date:
-        start = date.fromisoformat(start_date)
-        end = date.fromisoformat(end_date)
+        try:
+            start = date.fromisoformat(start_date)
+            end = date.fromisoformat(end_date)
+        except ValueError as exc:
+            raise ValidationError(
+                code="INVALID_DATE_RANGE",
+                message="Dates must use ISO format YYYY-MM-DD.",
+            ) from exc
         if start > end:
             raise ValidationError(
                 code="INVALID_DATE_RANGE",

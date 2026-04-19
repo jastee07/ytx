@@ -28,3 +28,10 @@ def test_parse_date_range_rejects_reversed_dates() -> None:
     with pytest.raises(ValidationError) as exc:
         dates.parse_date_range(None, "2026-03-28", "2026-03-01")
     assert exc.value.code == "INVALID_DATE_RANGE"
+
+
+def test_parse_date_range_rejects_invalid_iso_date() -> None:
+    with pytest.raises(ValidationError) as exc:
+        dates.parse_date_range(None, "03/28/2026", "2026-03-30")
+    assert exc.value.code == "INVALID_DATE_RANGE"
+    assert "ISO format" in exc.value.message
