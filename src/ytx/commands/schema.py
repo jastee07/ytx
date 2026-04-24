@@ -205,7 +205,11 @@ COMMAND_CONTRACTS: dict[str, dict[str, Any]] = {
     "analytics.query": {
         "description": "Generic Analytics API query.",
         "options": {
-            "--entity": {"required": True, "type": "enum", "values": ["channel", "video"]},
+            "--entity": {
+                "required": True,
+                "type": "enum",
+                "values": ["channel", "video"],
+            },
             "--video-id": {"required": False, "type": "string"},
             "--range": {"required": False, "type": "string"},
             "--start-date": {"required": False, "type": "date"},
