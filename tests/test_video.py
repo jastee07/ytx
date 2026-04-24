@@ -61,6 +61,12 @@ class TestVideoList:
         assert len(items) == 1
         assert items[0]["video_id"] == "vid1"
 
+    def test_all_flag_exits_0(self, fake_data):
+        result = runner.invoke(app, ["list", "--all", "--max-pages", "2", "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert isinstance(data["data"]["items"], list)
+
     def test_missing_scope_exits_4(self, patch_ctx):
         patch_ctx.profile_store = FakeProfileStore(
             profiles={"default": make_profile(scopes=[])}

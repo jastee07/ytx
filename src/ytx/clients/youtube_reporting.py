@@ -14,7 +14,7 @@ class YouTubeReportingClient:
 
     Typical usage:
       1. List available report types (list_report_types).
-      2. Create a reporting job for a desired type (create_job).
+      2. List existing reporting jobs (list_jobs).
       3. Poll for completed reports (list_reports).
       4. Download the CSV payload (download_report).
     """
@@ -69,21 +69,6 @@ class YouTubeReportingClient:
         except Exception as exc:
             raise map_google_http_error(exc) from exc
         return response.get("jobs", [])
-
-    def create_job(self, *, report_type_id: str, name: str) -> dict[str, Any]:
-        """Create a new reporting job for the given report type."""
-        body = {"reportTypeId": report_type_id, "name": name}
-        try:
-            return self._service.jobs().create(body=body).execute(num_retries=3)
-        except Exception as exc:
-            raise map_google_http_error(exc) from exc
-
-    def delete_job(self, job_id: str) -> None:
-        """Delete a reporting job by ID."""
-        try:
-            self._service.jobs().delete(jobId=job_id).execute(num_retries=3)
-        except Exception as exc:
-            raise map_google_http_error(exc) from exc
 
     # ------------------------------------------------------------------
     # Reports

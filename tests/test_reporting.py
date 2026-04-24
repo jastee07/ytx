@@ -81,59 +81,16 @@ class TestListJobs:
         assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
 
 
-# ---------------------------------------------------------------------------
-# create-job
-# ---------------------------------------------------------------------------
+class TestReadOnlySurface:
+    def test_create_job_command_not_available(self):
+        result = runner.invoke(app, ["create-job", "--help"])
+        assert result.exit_code != 0
+        assert "No such command 'create-job'" in result.output
 
-
-class TestCreateJob:
-    def test_json_output_contains_new_job(self, fake_reporting):
-        result = runner.invoke(
-            app,
-            ["create-job", "--report-type-id", "rtype1", "--name", "New job", "--json"],
-        )
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert data["ok"] is True
-        assert data["data"]["id"] == "job2"
-        assert data["data"]["name"] == "New job"
-
-    def test_missing_scope_exits_4(self, patch_ctx):
-        patch_ctx.profile_store = FakeProfileStore(
-            profiles={"default": make_profile(scopes=[])}
-        )
-        result = runner.invoke(
-            app, ["create-job", "--report-type-id", "rtype1", "--name", "x", "--json"]
-        )
-        assert result.exit_code == 4
-        assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
-
-
-# ---------------------------------------------------------------------------
-# delete-job
-# ---------------------------------------------------------------------------
-
-
-class TestDeleteJob:
-    def test_json_output_on_success(self, fake_reporting):
-        result = runner.invoke(app, ["delete-job", "--job-id", "job1", "--json"])
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert data["ok"] is True
-        assert data["data"]["deleted"] is True
-        assert data["data"]["job_id"] == "job1"
-
-    def test_human_output_exits_0(self, fake_reporting):
-        result = runner.invoke(app, ["delete-job", "--job-id", "job1"])
-        assert result.exit_code == 0
-
-    def test_missing_scope_exits_1(self, patch_ctx):
-        patch_ctx.profile_store = FakeProfileStore(
-            profiles={"default": make_profile(scopes=[])}
-        )
-        result = runner.invoke(app, ["delete-job", "--job-id", "job1", "--json"])
-        assert result.exit_code == 1
-        assert json.loads(result.output)["error"]["code"] == "INSUFFICIENT_SCOPE"
+    def test_delete_job_command_not_available(self):
+        result = runner.invoke(app, ["delete-job", "--help"])
+        assert result.exit_code != 0
+        assert "No such command 'delete-job'" in result.output
 
 
 # ---------------------------------------------------------------------------
