@@ -66,6 +66,12 @@ def channel_get(
 def channel_videos(
     limit: int = typer.Option(25, "--limit"),
     page_token: str | None = typer.Option(None, "--page-token"),
+    fetch_all: bool = typer.Option(
+        False, "--all", help="Auto-page until --limit items are collected."
+    ),
+    max_pages: int | None = typer.Option(
+        None, "--max-pages", help="Maximum pages to fetch when --all is set."
+    ),
     profile: str | None = typer.Option(None, "--profile"),
     as_json: bool = typer.Option(False, "--json"),
     as_csv: bool = typer.Option(False, "--csv"),
@@ -77,9 +83,17 @@ def channel_videos(
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_VIDEO)
         service = ChannelService(load_data_client(ctx, profile_name), ctx.cache)
-        videos, next_page_token = service.list_recent_videos(
-            profile_name, limit=limit, page_token=page_token
-        )
+        if fetch_all:
+            videos, next_page_token = service.list_recent_videos_all(
+                profile_name,
+                limit=limit,
+                page_token=page_token,
+                max_pages=max_pages,
+            )
+        else:
+            videos, next_page_token = service.list_recent_videos(
+                profile_name, limit=limit, page_token=page_token
+            )
         render_payload(
             api="youtube_data",
             profile_name=profile_name,

@@ -33,8 +33,16 @@ class TestSchemaShowJson:
             "entities",
             "exit_codes",
             "env_vars",
+            "commands",
         ):
             assert key in payload, f"Missing key: {key}"
+
+    def test_commands_contracts_present(self, patch_ctx):
+        result = runner.invoke(app, ["--json"])
+        data = json.loads(result.output, strict=False)["data"]
+        assert "channel.videos" in data["commands"]
+        assert "--limit" in data["commands"]["channel.videos"]["options"]
+        assert "reporting.list-jobs" in data["commands"]
 
     def test_all_metric_aliases_present(self, patch_ctx):
         result = runner.invoke(app, ["--json"])
@@ -89,3 +97,4 @@ class TestSchemaShowHuman:
         assert "Filters" in result.output
         assert "Exit codes" in result.output
         assert "Env vars" in result.output
+        assert "Commands" in result.output

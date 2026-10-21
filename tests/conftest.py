@@ -228,19 +228,8 @@ class FakeReportingClient:
     def list_jobs(self, *, include_system_managed=False):
         return FAKE_JOBS
 
-    def create_job(self, *, report_type_id, name):
-        return {
-            "id": "job2",
-            "reportTypeId": report_type_id,
-            "name": name,
-            "createTime": "2026-04-01T00:00:00Z",
-        }
-
     def list_reports(self, job_id, *, created_after=None, start_time_at_or_after=None):
         return [r for r in FAKE_REPORTS if r["jobId"] == job_id]
-
-    def delete_job(self, job_id):
-        pass  # no-op; tests assert exit code / output
 
     def download_report(self, download_url):
         return FAKE_REPORT_CSV

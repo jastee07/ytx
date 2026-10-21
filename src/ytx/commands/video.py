@@ -29,6 +29,13 @@ app = typer.Typer(help="Video inventory and analytics.")
 @app.command("list")
 def video_list(
     limit: int = typer.Option(25, "--limit"),
+    page_token: str | None = typer.Option(None, "--page-token"),
+    fetch_all: bool = typer.Option(
+        False, "--all", help="Auto-page until --limit items are collected."
+    ),
+    max_pages: int | None = typer.Option(
+        None, "--max-pages", help="Maximum pages to fetch when --all is set."
+    ),
     published_after: str | None = typer.Option(None, "--published-after"),
     profile: str | None = typer.Option(None, "--profile"),
     as_json: bool = typer.Option(False, "--json"),
@@ -41,7 +48,19 @@ def video_list(
         profile_meta = get_profile_metadata(ctx, profile_name)
         require_capability(profile_meta, READ_VIDEO)
         service = ChannelService(load_data_client(ctx, profile_name), ctx.cache)
-        videos, next_page_token = service.list_recent_videos(profile_name, limit=limit)
+        if fetch_all:
+            videos, next_page_token = service.list_recent_videos_all(
+                profile_name=profile_name,
+                limit=limit,
+                page_token=page_token,
+                max_pages=max_pages,
+            )
+        else:
+            videos, next_page_token = service.list_recent_videos(
+                profile_name,
+                limit=limit,
+                page_token=page_token,
+            )
         items = [video.model_dump() for video in videos]
         if published_after:
             items = [
